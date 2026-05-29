@@ -142,6 +142,48 @@
     .section-warn .warn-icon { font-size: 0.85rem; }
     .section-reason { font-size: 0.75rem; color: #777; margin-top: 2px; }
 
+    /* ---- Time Filter ---- */
+    .time-filter {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      padding: 14px 16px;
+      background: #f0f6ff;
+      border: 1px solid #b8d0f0;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #334;
+    }
+    .time-filter label { font-weight: 500; white-space: nowrap; }
+    .time-filter input[type=text] {
+      border: 1px solid #ccd;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 0.85rem;
+      outline: none;
+      color: #1a1a2e;
+      background: #fff;
+      width: 70px;
+    }
+    .time-filter input[type=text]:focus { border-color: #0055aa; }
+    .time-filter input[type=text].invalid { border-color: #ef4444; }
+    .time-filter .tf-applies {
+      font-size: 0.75rem;
+      color: #557;
+      flex-basis: 100%;
+      margin-top: 4px;
+    }
+    .time-filter .tf-sep { color: #aab; }
+    .btn-link-sm {
+      background: none; border: none;
+      color: #0055aa; cursor: pointer;
+      font-size: 0.78rem; padding: 0;
+      text-decoration: underline;
+      white-space: nowrap;
+    }
+
     /* ---- Export Bar ---- */
     .export-bar {
       display: flex;
@@ -250,6 +292,16 @@
 
     <div class="section-list" id="section-list"></div>
 
+    <div class="time-filter" id="time-filter">
+      <label>⏱ Time range filter</label>
+      <span class="tf-sep">From</span>
+      <input type="text" id="time-from" placeholder="HH:MM" maxlength="5" onfocus="this.select()" oninput="timeInput(this)" onblur="timeBlur(this)" />
+      <span class="tf-sep">to</span>
+      <input type="text" id="time-to" placeholder="HH:MM" maxlength="5" onfocus="this.select()" oninput="timeInput(this)" onblur="timeBlur(this)" />
+      <button class="btn-link-sm" onclick="clearTimeFilter()">Clear</button>
+      <div class="tf-applies" id="tf-applies"></div>
+    </div>
+
     <div class="export-bar">
       <input type="text" id="output-filename" placeholder="output-filename.html" value="pbuttons_filtered.html" />
       <span class="count-badge" id="count-badge">0 sections selected</span>
@@ -262,6 +314,7 @@
 <script>
   let sessionId = null;
   let allSections = [];
+  let filterableTitles = [];
 
   // ---- Drag & drop wiring ----
   const dropZone = document.getElementById('drop-zone');
@@ -305,6 +358,11 @@
 
     const hasSensitive = sections.some(s => s.sensitive);
     document.getElementById('sensitive-banner').style.display = hasSensitive ? 'block' : 'none';
+
+    filterableTitles = sections.filter(s => s.time_filterable).map(s => s.title);
+    const tfPanel = document.getElementById('time-filter');
+    tfPanel.style.display = filterableTitles.length ? 'flex' : 'none';
+    updateTimeFilterLabel();
 
     sections.forEach(s => {
       const item = document.createElement('div');
@@ -385,10 +443,28 @@
     btn.textContent = 'Generating…';
 
     try {
+      const timeFromEl = document.getElementById('time-from');
+      const timeToEl   = document.getElementById('time-to');
+      const _validTime = v => v === '' || /^\d{1,2}:\d{2}$/.test(v.trim());
+      timeFromEl.classList.toggle('invalid', !_validTime(timeFromEl.value));
+      timeToEl.classList.toggle('invalid',   !_validTime(timeToEl.value));
+      if (!_validTime(timeFromEl.value) || !_validTime(timeToEl.value)) {
+        btn.disabled = false; btn.textContent = 'Download filtered file';
+        throw new Error('Time must be in HH:MM 24-hour format (e.g. 02:30)');
+      }
+      const timeFrom = timeFromEl.value.trim();
+      const timeTo   = timeToEl.value.trim();
+
       const res = await fetch('/export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ session_id: sessionId, selected_ids: selectedIds, output_filename: outputFilename }),
+        body: JSON.stringify({
+          session_id: sessionId,
+          selected_ids: selectedIds,
+          output_filename: outputFilename,
+          time_from: timeFrom,
+          time_to: timeTo,
+        }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -400,7 +476,7 @@
       a.href = url;
       a.download = outputFilename;
       a.click();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
       showStatus('success', `✅ Downloaded <strong>${outputFilename}</strong> with ${selectedIds.length} sections.`);
     } catch (err) {
       showStatus('error', '❌ ' + err.message);
@@ -409,6 +485,47 @@
       btn.textContent = 'Download filtered file';
     }
   }
+
+  function updateTimeFilterLabel() {
+    const el = document.getElementById('tf-applies');
+    if (!filterableTitles.length) { el.textContent = ''; return; }
+    el.textContent = 'Applies to: ' + filterableTitles.join(', ');
+  }
+
+  function timeInput(el) {
+    let digits = el.value.replace(/\D/g, '').slice(0, 4);
+    if (digits.length > 2) digits = digits.slice(0, 2) + ':' + digits.slice(2);
+    el.value = digits;
+    el.classList.remove('invalid');
+  }
+
+  function timeBlur(el) {
+    const v = el.value.trim();
+    if (!v) { localStorage.removeItem('pbtns_' + el.id); return; }
+    const m = v.match(/^(\d{1,2})(?::(\d{0,2}))?$/);
+    if (!m) { el.classList.add('invalid'); return; }
+    const h  = m[1].padStart(2, '0');
+    const mn = (m[2] || '00').padEnd(2, '0');
+    if (parseInt(h) > 23 || parseInt(mn) > 59) { el.classList.add('invalid'); return; }
+    el.value = h + ':' + mn;
+    localStorage.setItem('pbtns_' + el.id, el.value);
+  }
+
+  function clearTimeFilter() {
+    const from = document.getElementById('time-from');
+    const to   = document.getElementById('time-to');
+    from.value = ''; to.value = '';
+    localStorage.removeItem('pbtns_time-from');
+    localStorage.removeItem('pbtns_time-to');
+  }
+
+  // Restore saved time range on load
+  (function restoreTimeFilter() {
+    const from = localStorage.getItem('pbtns_time-from');
+    const to   = localStorage.getItem('pbtns_time-to');
+    if (from) document.getElementById('time-from').value = from;
+    if (to)   document.getElementById('time-to').value   = to;
+  })();
 
   function showStatus(type, html) {
     const el = document.getElementById('status');
