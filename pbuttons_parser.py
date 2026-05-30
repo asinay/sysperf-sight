@@ -245,7 +245,7 @@ def build_output(
     panels_html = ''
     for s in sections:
         is_selected = s.id in selected_set
-        collapsed = s.id in COLLAPSED_BY_DEFAULT
+        collapsed = s.id in COLLAPSED_BY_DEFAULT and s.id not in analysis
         pre_text = _extract_pre_text(s.content_html)
 
         if is_selected:
@@ -435,6 +435,35 @@ document.addEventListener('DOMContentLoaded', () => {{
   const first = document.querySelector('.nav-item:not(.excluded)');
   if (first) first.click();
 }});
+
+// Shared sortable-table utility used by all analyzer tables
+(function() {{
+  const _state = {{}};
+  window.sortTable = function(tblId, col, th) {{
+    const tbl = document.getElementById(tblId);
+    if (!tbl) return;
+    const tbody = tbl.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const key = tblId + ':' + col;
+    const asc = !_state[key];
+    _state[key] = asc;
+    rows.sort((a, b) => {{
+      const av = a.cells[col] ? a.cells[col].textContent.trim() : '';
+      const bv = b.cells[col] ? b.cells[col].textContent.trim() : '';
+      const an = parseFloat(av.replace(/[^0-9.+]/g, ''));
+      const bn = parseFloat(bv.replace(/[^0-9.+]/g, ''));
+      const cmp = isNaN(an) || isNaN(bn) ? av.localeCompare(bv) : an - bn;
+      return asc ? cmp : -cmp;
+    }});
+    rows.forEach(r => tbody.appendChild(r));
+    tbl.querySelectorAll('th').forEach(h => {{
+      h.style.color = '';
+      h.textContent = h.textContent.replace(/ [▲▼]$/, '') + ' ↕';
+    }});
+    th.textContent = th.textContent.replace(/ [▲▼↕]$/, '') + (asc ? ' ▲' : ' ▼');
+    th.style.color = '#003366';
+  }};
+}})();
 </script>
 </body>
 </html>'''

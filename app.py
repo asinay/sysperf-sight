@@ -1,5 +1,6 @@
 import uuid
 import asyncio
+from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse
@@ -14,7 +15,13 @@ OUTPUT_DIR = Path("outputs")
 UPLOAD_DIR.mkdir(exist_ok=True)
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-app = FastAPI(title="pButtons Parser")
+
+@asynccontextmanager
+async def lifespan(_app):
+    yield
+
+
+app = FastAPI(title="pButtons Parser", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # In-memory store: session_id -> (header_html, sections)
@@ -97,10 +104,12 @@ async def export_file(req: ExportRequest):
     analyzable = [(s, SECTION_ANALYZERS[s.id]) for s in selected_sections if s.id in SECTION_ANALYZERS]
 
     async def run_analyzer(section, fn):
+        import traceback
         try:
             text = '\n'.join(_re.findall(r'<pre>(.*?)</pre>', section.content_html, _re.DOTALL | _re.IGNORECASE))
             return section.id, await fn(text)
         except Exception:
+            print(f'[analyzer] {section.id} EXCEPTION:\n{traceback.format_exc()}', flush=True)
             return section.id, ''
 
     results = await asyncio.gather(*[run_analyzer(s, fn) for s, fn in analyzable])

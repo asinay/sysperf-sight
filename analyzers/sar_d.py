@@ -266,14 +266,18 @@ async def analyze(section_text: str) -> str:
                      f'<td style="padding:5px 10px;font-size:0.77rem;font-family:monospace">{row["device"]}</td>'
                      f'{cells}</tr>')
 
+    th_sort_cells = ''.join(
+        f'<th onclick="sortTable(\'sard-sum\',{i+1},this)" style="padding:7px 10px;text-align:right;cursor:pointer;user-select:none">{label_map[c]} ↕</th>'
+        for i, c in enumerate(sum_cols)
+    )
     summary_table = f'''
 <div style="margin-bottom:14px;overflow-x:auto">
-  <table style="border-collapse:collapse;width:100%;background:#f8f9fc;
+  <table id="sard-sum" style="border-collapse:collapse;width:100%;background:#f8f9fc;
                 border:1px solid #dde3ee;border-radius:8px;overflow:hidden">
     <thead>
       <tr style="background:#eef2f7;font-size:0.7rem;color:#667;text-transform:uppercase">
-        <th style="padding:7px 10px;text-align:left">Device</th>
-        {th_cells}
+        <th onclick="sortTable('sard-sum',0,this)" style="padding:7px 10px;text-align:left;cursor:pointer;user-select:none">Device ↕</th>
+        {th_sort_cells}
       </tr>
     </thead>
     <tbody>{sum_rows}</tbody>

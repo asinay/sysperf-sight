@@ -328,10 +328,10 @@ async def analyze(section_text: str) -> str:
             for dev, v in util_avg_all.items() if not pd.isna(v)
         )
         util_table = f'''
-<table style="font-size:0.78rem;border-collapse:collapse;margin:0 0 14px 0">
+<table id="iostat-util" style="font-size:0.78rem;border-collapse:collapse;margin:0 0 14px 0">
   <thead><tr style="color:#888;font-size:0.72rem;font-weight:600;text-transform:uppercase">
-    <th style="text-align:left;padding-bottom:4px">Device (physical)</th>
-    <th style="text-align:right;padding-bottom:4px">Avg %util</th>
+    <th onclick="sortTable('iostat-util',0,this)" style="text-align:left;padding-bottom:4px;cursor:pointer;user-select:none">Device (physical) ↕</th>
+    <th onclick="sortTable('iostat-util',1,this)" style="text-align:right;padding-bottom:4px;cursor:pointer;user-select:none">Avg %util ↕</th>
   </tr></thead>
   <tbody>{rows_html}</tbody>
 </table>'''

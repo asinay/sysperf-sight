@@ -515,17 +515,17 @@ async def analyze(section_text: str) -> str:
   <div style="font-size:0.8rem;font-weight:600;color:#555;margin-bottom:8px;
               text-transform:uppercase;letter-spacing:.06em">Top processes — CPU delta across snapshots</div>
   <div style="overflow-x:auto">
-    <table style="border-collapse:collapse;width:100%;background:#f8f9fc;
+    <table id="ss-top-cpu" style="border-collapse:collapse;width:100%;background:#f8f9fc;
                   border:1px solid #dde3ee;border-radius:8px;overflow:hidden">
       <thead>
         <tr style="background:#eef2f7;font-size:0.7rem;color:#667;text-transform:uppercase">
-          <th style="padding:7px 10px;text-align:left">PID</th>
-          <th style="padding:7px 10px;text-align:left">Routine</th>
-          <th style="padding:7px 10px;text-align:left">Namespace</th>
-          <th style="padding:7px 10px;text-align:left">Type</th>
-          <th style="padding:7px 10px;text-align:right">CPU delta</th>
-          <th style="padding:7px 10px;text-align:right">Glob delta</th>
-          <th style="padding:7px 10px;text-align:left">Seen in</th>
+          <th onclick="sortTable('ss-top-cpu',0,this)" style="padding:7px 10px;text-align:left;cursor:pointer;user-select:none">PID ↕</th>
+          <th onclick="sortTable('ss-top-cpu',1,this)" style="padding:7px 10px;text-align:left;cursor:pointer;user-select:none">Routine ↕</th>
+          <th onclick="sortTable('ss-top-cpu',2,this)" style="padding:7px 10px;text-align:left;cursor:pointer;user-select:none">Namespace ↕</th>
+          <th onclick="sortTable('ss-top-cpu',3,this)" style="padding:7px 10px;text-align:left;cursor:pointer;user-select:none">Type ↕</th>
+          <th onclick="sortTable('ss-top-cpu',4,this)" style="padding:7px 10px;text-align:right;cursor:pointer;user-select:none">CPU delta ↕</th>
+          <th onclick="sortTable('ss-top-cpu',5,this)" style="padding:7px 10px;text-align:right;cursor:pointer;user-select:none">Glob delta ↕</th>
+          <th onclick="sortTable('ss-top-cpu',6,this)" style="padding:7px 10px;text-align:left;cursor:pointer;user-select:none">Seen in ↕</th>
         </tr>
       </thead>
       <tbody>{rows_html}</tbody>
@@ -561,13 +561,13 @@ async def analyze(section_text: str) -> str:
   <div style="font-size:0.8rem;font-weight:600;color:#555;margin-bottom:8px;
               text-transform:uppercase;letter-spacing:.06em">Processes per namespace</div>
   <div style="overflow-x:auto">
-    <table style="border-collapse:collapse;background:#f8f9fc;border:1px solid #dde3ee;
+    <table id="ss-ns" style="border-collapse:collapse;background:#f8f9fc;border:1px solid #dde3ee;
                   border-radius:8px;overflow:hidden">
       <thead>
         <tr style="background:#eef2f7;font-size:0.7rem;color:#667;text-transform:uppercase">
-          <th style="padding:7px 10px;text-align:left">Namespace</th>
-          <th style="padding:7px 10px;text-align:right">Avg processes</th>
-          <th style="padding:7px 10px;text-align:right">Peak processes</th>
+          <th onclick="sortTable('ss-ns',0,this)" style="padding:7px 10px;text-align:left;cursor:pointer;user-select:none">Namespace ↕</th>
+          <th onclick="sortTable('ss-ns',1,this)" style="padding:7px 10px;text-align:right;cursor:pointer;user-select:none">Avg processes ↕</th>
+          <th onclick="sortTable('ss-ns',2,this)" style="padding:7px 10px;text-align:right;cursor:pointer;user-select:none">Peak processes ↕</th>
         </tr>
       </thead>
       <tbody>{ns_rows_html}</tbody>
@@ -606,13 +606,13 @@ async def analyze(section_text: str) -> str:
   <div style="font-size:0.8rem;font-weight:600;color:#555;margin-bottom:8px;
               text-transform:uppercase;letter-spacing:.06em">Top 5 routines by concurrent process count</div>
   <div style="overflow-x:auto">
-    <table style="border-collapse:collapse;background:#f8f9fc;border:1px solid #dde3ee;
+    <table id="ss-top-rtn" style="border-collapse:collapse;background:#f8f9fc;border:1px solid #dde3ee;
                   border-radius:8px;overflow:hidden">
       <thead>
         <tr style="background:#eef2f7;font-size:0.7rem;color:#667;text-transform:uppercase">
-          <th style="padding:7px 10px;text-align:left">Routine</th>
-          <th style="padding:7px 10px;text-align:left">Namespace</th>
-          <th style="padding:7px 10px;text-align:right">Peak concurrent</th>
+          <th onclick="sortTable('ss-top-rtn',0,this)" style="padding:7px 10px;text-align:left;cursor:pointer;user-select:none">Routine ↕</th>
+          <th onclick="sortTable('ss-top-rtn',1,this)" style="padding:7px 10px;text-align:left;cursor:pointer;user-select:none">Namespace ↕</th>
+          <th onclick="sortTable('ss-top-rtn',2,this)" style="padding:7px 10px;text-align:right;cursor:pointer;user-select:none">Peak concurrent ↕</th>
         </tr>
       </thead>
       <tbody>{rtn_rows_html}</tbody>

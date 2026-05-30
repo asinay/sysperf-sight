@@ -10,6 +10,9 @@ from .iostat import analyze as analyze_iostat
 from .cpu import analyze as analyze_cpu
 from .ss import analyze as analyze_ss
 from .sar_d import analyze as analyze_sar_d
+from .sar_u import analyze as analyze_sar_u
+from .vmstat import analyze as analyze_vmstat
+from .irisstat_d import analyze as analyze_irisstat_d
 
 SECTION_ANALYZERS = {
     "Windowsinfo": analyze_windows_info,
@@ -19,4 +22,7 @@ SECTION_ANALYZERS = {
     "cpu": analyze_cpu,
     "%SS": analyze_ss,
     "sar-d": analyze_sar_d,
+    "sar-u": analyze_sar_u,
+    "vmstat": analyze_vmstat,
+    "irisstat-D": analyze_irisstat_d,
 }

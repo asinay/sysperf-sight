@@ -143,10 +143,38 @@ def filter_sar(text: str, time_from: str, time_to: str) -> str:
     return ''.join(result)
 
 
+_VMSTAT_DATA_RE = re.compile(
+    r'^\s*\d{2}/\d{2}/\d{2,4}\s+(\d{2}):(\d{2}):\d{2}\s+\d',
+)
+
+
+def filter_vmstat(text: str, time_from: str, time_to: str) -> str:
+    lo = _parse_hhmm(time_from) if time_from else None
+    hi = _parse_hhmm(time_to) if time_to else None
+    if lo is None and hi is None:
+        return text
+
+    lines = text.splitlines(keepends=True)
+    result = []
+    for line in lines:
+        m = _VMSTAT_DATA_RE.match(line)
+        if m:
+            try:
+                row_time = Time(int(m.group(1)), int(m.group(2)))
+                if _in_range(row_time, lo, hi):
+                    result.append(line)
+            except ValueError:
+                result.append(line)
+        else:
+            result.append(line)
+    return ''.join(result)
+
+
 # Keyed by section title (more stable than IDs for sar/vmstat whose div ids vary)
 TITLE_TIME_FILTERS: dict[str, callable] = {
     'mgstat': filter_mgstat,
     'iostat': filter_iostat,
     'sar -u': filter_sar,
     'sar -d': filter_sar,
+    'vmstat': filter_vmstat,
 }

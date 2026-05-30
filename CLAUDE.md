@@ -15,8 +15,10 @@ Always use the `venv` virtual environment — never global pip or python.
 python -m venv venv
 ./venv/Scripts/pip install -r requirements.txt
 
-# Run the dev server
-./venv/Scripts/uvicorn app:app --host 127.0.0.1 --port 8000 --reload
+# Run the dev server (no --reload — it leaves unkillable stale processes on Windows)
+# If a port is squatted by a stale process, increment the port number (8001, 8002, ...)
+# A full reboot clears all stale processes.
+./venv/Scripts/uvicorn app:app --host 127.0.0.1 --port 8002
 ```
 
 The app is then available at http://127.0.0.1:8000.
@@ -82,7 +84,7 @@ When adding a new section, update both the title-keyed and ID-keyed dicts as app
 | ifconfig | ifconfig | — | — | — | |
 | sysctl -a | sysctl-a | — | — | — | |
 | ps | ps | — | — | — | |
-| vmstat | vmstat | — | — | — | |
+| vmstat | vmstat | — | ✓ | ✓ | MM/DD/YY HH:MM:SS timestamp; header row has same timestamp format as data rows — skip rows where first value is non-numeric |
 | sar -u | sar-u | — | — | ✓ | AM/PM timestamps on some locales |
 | free | free | — | — | — | |
 | iostat | iostat | — | ✓ | ✓ | AM/PM timestamps on some locales |
@@ -130,6 +132,9 @@ Current analyzers:
 | cpu | cpu.py | CPU topology summary |
 | %SS | ss.py | Process type breakdown, TCP trend, top-CPU/Glob tables, processes-per-namespace table, top-5-routines-by-concurrent-count table; insights |
 | sar-d | sar_d.py | %util, tps, throughput, r/w latency, queue depth charts; per-device summary table with latency baselines; insights |
+| sar-u | sar_u.py | Stacked area CPU chart (user/sys/iowait/steal + idle dotted); stat cards from Average: line; insights for saturation/steal/iowait. Falls back to fixed column order when header line absent |
+| vmstat | vmstat.py | Run queue + blocked, swap I/O, CPU breakdown, block I/O charts; stat cards; insights. Skips header row by checking first value is numeric |
+| irisstat-D | irisstat_d.py | Lock contention summary table (sortable) + per-second rates table (sortable); insights flagging Bseize>0 on Global/LockHTAB/LockLHB/TransCB; block collision flags. Handles Linux (4-col) and Windows (6-col) column variants |
 
 ### Shared UI patterns
 
