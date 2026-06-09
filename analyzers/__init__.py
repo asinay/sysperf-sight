@@ -13,6 +13,8 @@ from .sar_d import analyze as analyze_sar_d
 from .sar_u import analyze as analyze_sar_u
 from .vmstat import analyze as analyze_vmstat
 from .irisstat_d import analyze as analyze_irisstat_d
+from .perfmon import analyze as analyze_perfmon
+from .cpf import analyze as analyze_cpf
 
 SECTION_ANALYZERS = {
     "Windowsinfo": analyze_windows_info,
@@ -25,4 +27,6 @@ SECTION_ANALYZERS = {
     "sar-u": analyze_sar_u,
     "vmstat": analyze_vmstat,
     "irisstat-D": analyze_irisstat_d,
+    "perfmon": analyze_perfmon,
+    "CPFfile": analyze_cpf,
 }

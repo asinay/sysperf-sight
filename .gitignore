@@ -14,3 +14,10 @@ __pycache__/
 
 # Claude Code settings
 .claude/
+
+# Reference PDFs (copyright, not for distribution)
+*.pdf
+
+# Test output logs
+tests/*.log
+tests/*.html

@@ -170,6 +170,34 @@ def filter_vmstat(text: str, time_from: str, time_to: str) -> str:
     return ''.join(result)
 
 
+# PDH-CSV data rows start with a quoted timestamp: "MM/DD/YYYY HH:MM:SS.mmm"
+_PERFMON_DATA_RE = re.compile(
+    r'^"(\d{2}/\d{2}/\d{4})\s+(\d{1,2}):(\d{2}):\d{2}',
+)
+
+
+def filter_perfmon(text: str, time_from: str, time_to: str) -> str:
+    lo = _parse_hhmm(time_from) if time_from else None
+    hi = _parse_hhmm(time_to) if time_to else None
+    if lo is None and hi is None:
+        return text
+
+    lines = text.splitlines(keepends=True)
+    result = []
+    for line in lines:
+        m = _PERFMON_DATA_RE.match(line)
+        if m:
+            try:
+                row_time = Time(int(m.group(2)), int(m.group(3)))
+                if _in_range(row_time, lo, hi):
+                    result.append(line)
+            except ValueError:
+                result.append(line)
+        else:
+            result.append(line)
+    return ''.join(result)
+
+
 # Keyed by section title (more stable than IDs for sar/vmstat whose div ids vary)
 TITLE_TIME_FILTERS: dict[str, callable] = {
     'mgstat': filter_mgstat,
@@ -177,4 +205,5 @@ TITLE_TIME_FILTERS: dict[str, callable] = {
     'sar -u': filter_sar,
     'sar -d': filter_sar,
     'vmstat': filter_vmstat,
+    'perfmon': filter_perfmon,
 }

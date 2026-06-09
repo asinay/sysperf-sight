@@ -44,6 +44,24 @@ The following sections are flagged and deselected by default:
 | Windows info | OS, hardware, and network configuration details |
 | tasklist | All running processes on the machine |
 
+## Analyzers
+
+Selected sections with an analyzer get inline charts and insights injected above their raw data:
+
+| Section | What it produces |
+|---|---|
+| Windows info | OS/hardware summary cards |
+| tasklist | Top processes by memory |
+| mgstat | Global refs, physical I/O, journal writes, cache, network charts; stat cards; insights |
+| iostat | %util, CPU iowait, IOPS, throughput, latency charts; insights |
+| cpu | CPU topology summary |
+| %SS | Process type breakdown, TCP trend, top-CPU/Glob tables, namespace breakdown; insights |
+| sar -d | %util, tps, throughput, r/w latency, queue depth charts; per-device summary; insights |
+| sar -u | Stacked CPU chart (user/sys/iowait/steal); stat cards; insights |
+| vmstat | Run queue, swap I/O, CPU breakdown, block I/O charts; stat cards; insights |
+| irisstat -D | Lock contention summary and per-second rates tables; insights |
+| perfmon | CPU utilization, processor queue, available memory, paging, disk IOPS/throughput/latency, network throughput charts; insights |
+
 ## Project structure
 
 ```
