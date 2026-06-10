@@ -7,11 +7,71 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --bg: #f0f2f5;
+      --card-bg: #fff;
+      --text: #1a1a2e;
+      --text-muted: #555;
+      --text-faint: #999;
+      --border: #e0e4ec;
+      --border-hover: #aac;
+      --item-hover-bg: #f7f9ff;
+      --item-sel-bg: #f0f6ff;
+      --filename-badge-bg: #e8edf5;
+      --filename-badge-color: #445;
+      --tf-bg: #f0f6ff;
+      --tf-border: #b8d0f0;
+      --tf-color: #334;
+      --tf-sep: #aab;
+      --tf-applies: #557;
+      --input-bg: #fff;
+      --input-border: #ccd;
+      --section-reason: #777;
+      --warn-color: #b45309;
+      --sens-banner-bg: #fffbeb;
+      --sens-banner-border: #f59e0b;
+      --sens-banner-color: #78350f;
+      --status-err-bg: #fee2e2; --status-err-color: #991b1b; --status-err-border: #fca5a5;
+      --status-ok-bg: #dcfce7;  --status-ok-color: #166534;  --status-ok-border: #86efac;
+      --spinner-track: #cce;
+      --btn-disabled: #99b;
+    }
+    body.dark {
+      --bg: #0f1117;
+      --card-bg: #1a1d27;
+      --text: #e2e4ed;
+      --text-muted: #9ca3af;
+      --text-faint: #6b7280;
+      --border: #2d3148;
+      --border-hover: #4a5280;
+      --item-hover-bg: #1e2235;
+      --item-sel-bg: #1a2540;
+      --filename-badge-bg: #252840;
+      --filename-badge-color: #9ca8c8;
+      --tf-bg: #1a2540;
+      --tf-border: #2d4a80;
+      --tf-color: #c0c8e0;
+      --tf-sep: #4a5280;
+      --tf-applies: #7a88b0;
+      --input-bg: #252840;
+      --input-border: #3a4060;
+      --section-reason: #9ca3af;
+      --warn-color: #d97706;
+      --sens-banner-bg: #2a1f00;
+      --sens-banner-border: #92400e;
+      --sens-banner-color: #fcd34d;
+      --status-err-bg: #2d0f0f; --status-err-color: #fca5a5; --status-err-border: #7f1d1d;
+      --status-ok-bg: #0d2318;  --status-ok-color: #86efac;  --status-ok-border: #166534;
+      --spinner-track: #2d3148;
+      --btn-disabled: #3a3f60;
+    }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f0f2f5;
-      color: #1a1a2e;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
+      transition: background .2s, color .2s;
     }
 
     header {
@@ -25,6 +85,23 @@
     header h1 { font-size: 1.3rem; font-weight: 600; }
     header span { font-size: 0.85rem; opacity: 0.7; }
 
+    /* Dark mode toggle button */
+    .dark-toggle {
+      margin-left: auto;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      color: #fff;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background .15s;
+    }
+    .dark-toggle:hover { background: rgba(255,255,255,.22); }
+
     main {
       max-width: 860px;
       margin: 40px auto;
@@ -32,16 +109,17 @@
     }
 
     .card {
-      background: #fff;
+      background: var(--card-bg);
       border-radius: 10px;
       box-shadow: 0 2px 12px rgba(0,0,0,.08);
       padding: 32px;
       margin-bottom: 24px;
+      transition: background .2s;
     }
 
     /* ---- Upload Zone ---- */
     .upload-zone {
-      border: 2px dashed #aab;
+      border: 2px dashed var(--border-hover);
       border-radius: 8px;
       padding: 48px 24px;
       text-align: center;
@@ -50,18 +128,18 @@
     }
     .upload-zone:hover, .upload-zone.drag-over {
       border-color: #0055aa;
-      background: #f0f6ff;
+      background: var(--item-sel-bg);
     }
     .upload-zone input[type=file] { display: none; }
     .upload-zone .icon { font-size: 3rem; line-height: 1; margin-bottom: 12px; }
-    .upload-zone p { color: #555; margin-top: 6px; font-size: 0.9rem; }
-    .upload-zone .hint { font-size: 0.78rem; color: #999; margin-top: 4px; }
+    .upload-zone p { color: var(--text-muted); margin-top: 6px; font-size: 0.9rem; }
+    .upload-zone .hint { font-size: 0.78rem; color: var(--text-faint); margin-top: 4px; }
 
     /* ---- Spinner ---- */
     .spinner {
       display: inline-block;
       width: 18px; height: 18px;
-      border: 3px solid #cce;
+      border: 3px solid var(--spinner-track);
       border-top-color: #0055aa;
       border-radius: 50%;
       animation: spin .7s linear infinite;
@@ -82,10 +160,10 @@
     .panel-header h2 { font-size: 1.1rem; }
     .filename-badge {
       font-size: 0.78rem;
-      background: #e8edf5;
+      background: var(--filename-badge-bg);
       padding: 3px 10px;
       border-radius: 20px;
-      color: #445;
+      color: var(--filename-badge-color);
     }
 
     .select-all-row {
@@ -110,14 +188,14 @@
       align-items: flex-start;
       gap: 12px;
       padding: 12px 14px;
-      border: 1px solid #e0e4ec;
+      border: 1px solid var(--border);
       border-radius: 7px;
       cursor: pointer;
       transition: border-color .15s, background .15s;
       user-select: none;
     }
-    .section-item:hover { background: #f7f9ff; border-color: #aac; }
-    .section-item.selected { border-color: #0055aa; background: #f0f6ff; }
+    .section-item:hover { background: var(--item-hover-bg); border-color: var(--border-hover); }
+    .section-item.selected { border-color: #0055aa; background: var(--item-sel-bg); }
     .section-item.sensitive { border-left: 4px solid #f59e0b; }
     .section-item.sensitive.selected { border-left: 4px solid #0055aa; }
 
@@ -136,11 +214,11 @@
       align-items: center;
       gap: 4px;
       font-size: 0.75rem;
-      color: #b45309;
+      color: var(--warn-color);
       margin-top: 3px;
     }
     .section-warn .warn-icon { font-size: 0.85rem; }
-    .section-reason { font-size: 0.75rem; color: #777; margin-top: 2px; }
+    .section-reason { font-size: 0.75rem; color: var(--section-reason); margin-top: 2px; }
 
     /* ---- Time Filter ---- */
     .time-filter {
@@ -150,32 +228,32 @@
       flex-wrap: wrap;
       margin-top: 20px;
       padding: 14px 16px;
-      background: #f0f6ff;
-      border: 1px solid #b8d0f0;
+      background: var(--tf-bg);
+      border: 1px solid var(--tf-border);
       border-radius: 8px;
       font-size: 0.85rem;
-      color: #334;
+      color: var(--tf-color);
     }
     .time-filter label { font-weight: 500; white-space: nowrap; }
     .time-filter input[type=text] {
-      border: 1px solid #ccd;
+      border: 1px solid var(--input-border);
       border-radius: 6px;
       padding: 6px 10px;
       font-size: 0.85rem;
       outline: none;
-      color: #1a1a2e;
-      background: #fff;
+      color: var(--text);
+      background: var(--input-bg);
       width: 70px;
     }
     .time-filter input[type=text]:focus { border-color: #0055aa; }
     .time-filter input[type=text].invalid { border-color: #ef4444; }
     .time-filter .tf-applies {
       font-size: 0.75rem;
-      color: #557;
+      color: var(--tf-applies);
       flex-basis: 100%;
       margin-top: 4px;
     }
-    .time-filter .tf-sep { color: #aab; }
+    .time-filter .tf-sep { color: var(--tf-sep); }
     .btn-link-sm {
       background: none; border: none;
       color: #0055aa; cursor: pointer;
@@ -195,11 +273,13 @@
     .export-bar input[type=text] {
       flex: 1;
       min-width: 180px;
-      border: 1px solid #ccd;
+      border: 1px solid var(--input-border);
       border-radius: 6px;
       padding: 9px 12px;
       font-size: 0.9rem;
       outline: none;
+      background: var(--input-bg);
+      color: var(--text);
     }
     .export-bar input[type=text]:focus { border-color: #0055aa; }
 
@@ -216,22 +296,22 @@
       white-space: nowrap;
     }
     .btn-primary:hover { background: #0044cc; }
-    .btn-primary:disabled { background: #99b; cursor: not-allowed; }
+    .btn-primary:disabled { background: var(--btn-disabled); cursor: not-allowed; }
 
     .count-badge {
       font-size: 0.8rem;
-      color: #555;
+      color: var(--text-muted);
     }
 
     /* ---- Sensitive Warning Banner ---- */
     .sensitive-banner {
       display: none;
-      background: #fffbeb;
-      border: 1px solid #f59e0b;
+      background: var(--sens-banner-bg);
+      border: 1px solid var(--sens-banner-border);
       border-radius: 7px;
       padding: 12px 16px;
       font-size: 0.85rem;
-      color: #78350f;
+      color: var(--sens-banner-color);
       margin-bottom: 16px;
       line-height: 1.5;
     }
@@ -245,8 +325,8 @@
       display: none;
       margin-top: 12px;
     }
-    #status.error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-    #status.success { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    #status.error { background: var(--status-err-bg); color: var(--status-err-color); border: 1px solid var(--status-err-border); }
+    #status.success { background: var(--status-ok-bg); color: var(--status-ok-color); border: 1px solid var(--status-ok-border); }
   </style>
 </head>
 <body>
@@ -256,6 +336,9 @@
     <h1>pButtons Parser</h1>
     <span>InterSystems IRIS Performance Data — Section Extractor</span>
   </div>
+  <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">
+    <span id="dark-icon">🌙</span> Dark mode
+  </button>
 </header>
 
 <main>
@@ -312,6 +395,28 @@
 </main>
 
 <script>
+  // ---- Dark mode ----
+  (function initDark() {
+    const saved = localStorage.getItem('pbtns_dark');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (saved === 'true' || (saved === null && prefersDark)) applyDark(true);
+  })();
+
+  function applyDark(on) {
+    document.body.classList.toggle('dark', on);
+    const btn = document.getElementById('dark-toggle');
+    if (btn) {
+      document.getElementById('dark-icon').textContent = on ? '☀️' : '🌙';
+      btn.childNodes[1].textContent = on ? ' Light mode' : ' Dark mode';
+    }
+  }
+
+  function toggleDark() {
+    const on = !document.body.classList.contains('dark');
+    applyDark(on);
+    localStorage.setItem('pbtns_dark', on);
+  }
+
   let sessionId = null;
   let allSections = [];
   let filterableTitles = [];

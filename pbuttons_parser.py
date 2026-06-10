@@ -297,29 +297,58 @@ def build_output(
 <title>pButtons - {instance_name} {run_time}</title>
 <style>
 *,*::before,*::after{{box-sizing:border-box;margin:0;padding:0}}
-body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f0f2f5;color:#1a1a2e;display:flex;flex-direction:column;height:100vh;overflow:hidden}}
+
+:root{{
+  --bg:#f0f2f5;--card:#fff;--text:#1a1a2e;--text-dim:#778;--text-muted:#999;
+  --sidebar-bg:#fff;--sidebar-border:#dde3ee;
+  --nav-item:#334;--nav-hover-bg:#f0f6ff;--nav-active-bg:#e8f0ff;--nav-group-color:#889;
+  --excl-badge-bg:#f3f4f6;--excl-badge-color:#aaa;
+  --section-border:#f0f2f5;--section-hover:#fafbff;
+  --raw-bg:#f8f9fc;--raw-border:#e8edf5;
+  --excl-block-bg:#fafafa;--excl-block-border:#ddd;--excl-icon:#ccc;--excl-title:#bbb;--excl-sub:#ccc;
+  --sens-bg:#fffbeb;--sens-border:#f59e0b;--sens-color:#92400e;
+  --scrollbar:#ddd;
+  --topbar-badge:rgba(255,255,255,.15);
+}}
+body.dark{{
+  --bg:#0f1117;--card:#1a1d27;--text:#e2e4ed;--text-dim:#8896b0;--text-muted:#6b7280;
+  --sidebar-bg:#13161f;--sidebar-border:#252840;
+  --nav-item:#b0b8d0;--nav-hover-bg:#1e2235;--nav-active-bg:#1a2540;--nav-group-color:#5a6480;
+  --excl-badge-bg:#252840;--excl-badge-color:#6b7280;
+  --section-border:#252840;--section-hover:#1e2235;
+  --raw-bg:#13161f;--raw-border:#2d3148;
+  --excl-block-bg:#13161f;--excl-block-border:#2d3148;--excl-icon:#3a4060;--excl-title:#4a5280;--excl-sub:#3a4060;
+  --sens-bg:#2a1f00;--sens-border:#92400e;--sens-color:#fcd34d;
+  --scrollbar:#2d3148;
+  --topbar-badge:rgba(255,255,255,.1);
+}}
+
+body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;height:100vh;overflow:hidden;transition:background .2s,color .2s}}
 
 /* Top bar */
 .topbar{{background:#003366;color:#fff;padding:10px 20px;display:flex;align-items:center;gap:16px;flex-shrink:0;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.3)}}
 .topbar h1{{font-size:1rem;font-weight:700;white-space:nowrap}}
 .topbar .meta{{font-size:0.75rem;opacity:.75;display:flex;gap:12px;flex-wrap:wrap}}
 .topbar .meta span::before{{content:"·";margin-right:8px;opacity:.5}}
-.topbar .badge{{background:rgba(255,255,255,.15);border-radius:4px;padding:2px 8px;font-size:0.7rem;margin-left:auto;white-space:nowrap}}
+.topbar .badge{{background:var(--topbar-badge);border-radius:4px;padding:2px 8px;font-size:0.7rem;margin-left:auto;white-space:nowrap}}
+.dark-toggle{{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:5px;padding:4px 10px;font-size:0.75rem;cursor:pointer;white-space:nowrap}}
+.dark-toggle:hover{{background:rgba(255,255,255,.22)}}
 
 /* Layout */
 .layout{{display:flex;flex:1;overflow:hidden}}
 
 /* Sidebar */
-.sidebar{{width:220px;background:#fff;border-right:1px solid #dde3ee;overflow-y:auto;flex-shrink:0;padding:12px 0}}
+.sidebar{{width:220px;background:var(--sidebar-bg);border-right:1px solid var(--sidebar-border);overflow-y:auto;flex-shrink:0;padding:12px 0;transition:background .2s}}
 .nav-group{{margin-bottom:4px}}
-.nav-group-label{{padding:6px 16px;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#889;cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}}
-.nav-group-label:hover{{color:#003366}}
+.nav-group-label{{padding:6px 16px;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--nav-group-color);cursor:pointer;display:flex;justify-content:space-between;align-items:center;user-select:none}}
+.nav-group-label:hover{{color:#4d9fff}}
 .nav-group-items{{padding:0 0 4px 0}}
-.nav-item{{display:flex;align-items:center;gap:6px;padding:5px 16px 5px 24px;font-size:0.82rem;color:#334;text-decoration:none;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .1s}}
-.nav-item:hover{{background:#f0f6ff;color:#003366}}
-.nav-item.active{{background:#e8f0ff;color:#003366;font-weight:600;border-right:3px solid #003366}}
-.nav-item.excluded{{color:#bbb;font-style:italic}}
-.excl-badge{{font-size:0.65rem;background:#f3f4f6;color:#aaa;border-radius:3px;padding:1px 4px;margin-left:auto;flex-shrink:0}}
+.nav-item{{display:flex;align-items:center;gap:6px;padding:5px 16px 5px 24px;font-size:0.82rem;color:var(--nav-item);text-decoration:none;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .1s}}
+.nav-item:hover{{background:var(--nav-hover-bg);color:#4d9fff}}
+.nav-item.active{{background:var(--nav-active-bg);color:#003366;font-weight:600;border-right:3px solid #003366}}
+body.dark .nav-item.active{{color:#4d9fff;border-right-color:#4d9fff}}
+.nav-item.excluded{{color:var(--text-muted);font-style:italic}}
+.excl-badge{{font-size:0.65rem;background:var(--excl-badge-bg);color:var(--excl-badge-color);border-radius:3px;padding:1px 4px;margin-left:auto;flex-shrink:0}}
 .analysis-dot{{width:6px;height:6px;background:#0055aa;border-radius:50%;flex-shrink:0}}
 .chevron{{font-size:0.7rem;transition:transform .2s}}
 .chevron.open{{transform:rotate(180deg)}}
@@ -328,13 +357,14 @@ body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
 .main{{flex:1;overflow-y:auto;padding:24px}}
 
 /* Section panels */
-.section-panel{{background:#fff;border-radius:10px;box-shadow:0 1px 6px rgba(0,0,0,.07);margin-bottom:16px;overflow:hidden}}
-.section-header{{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;cursor:pointer;border-bottom:1px solid #f0f2f5;user-select:none}}
-.section-header:hover{{background:#fafbff}}
+.section-panel{{background:var(--card);border-radius:10px;box-shadow:0 1px 6px rgba(0,0,0,.07);margin-bottom:16px;overflow:hidden;transition:background .2s}}
+.section-header{{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;cursor:pointer;border-bottom:1px solid var(--section-border);user-select:none}}
+.section-header:hover{{background:var(--section-hover)}}
 .section-title-block{{display:flex;flex-direction:column;gap:2px}}
 .section-header h2{{font-size:1rem;font-weight:600;color:#003366}}
-.section-desc{{font-size:0.75rem;color:#778;font-weight:400;margin:0}}
-.section-chevron{{font-size:0.85rem;color:#999;transition:transform .2s}}
+body.dark .section-header h2{{color:#4d9fff}}
+.section-desc{{font-size:0.75rem;color:var(--text-dim);font-weight:400;margin:0}}
+.section-chevron{{font-size:0.85rem;color:var(--text-muted);transition:transform .2s}}
 .section-body{{padding:16px 20px}}
 
 /* Analysis block */
@@ -342,21 +372,22 @@ body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
 
 /* Raw data toggle */
 .raw-toggle{{display:inline-flex;align-items:center;gap:6px;font-size:0.78rem;color:#0055aa;cursor:pointer;padding:4px 0;margin-bottom:6px;user-select:none}}
+body.dark .raw-toggle{{color:#4d9fff}}
 .raw-toggle:hover{{text-decoration:underline}}
-.raw-content pre{{background:#f8f9fc;border:1px solid #e8edf5;border-radius:6px;padding:12px;font-size:0.75rem;line-height:1.5;overflow-x:auto;white-space:pre;max-height:500px;overflow-y:auto}}
+.raw-content pre{{background:var(--raw-bg);border:1px solid var(--raw-border);border-radius:6px;padding:12px;font-size:0.75rem;line-height:1.5;overflow-x:auto;white-space:pre;max-height:500px;overflow-y:auto;color:var(--text)}}
 
 /* Excluded */
-.excluded-block{{display:flex;align-items:flex-start;gap:12px;padding:16px;background:#fafafa;border:1px dashed #ddd;border-radius:6px;color:#999}}
-.excl-icon{{font-size:1.4rem;line-height:1;color:#ccc}}
-.excl-title{{font-weight:500;color:#bbb;font-size:0.85rem}}
-.excl-sub{{font-size:0.75rem;color:#ccc;margin-top:3px}}
+.excluded-block{{display:flex;align-items:flex-start;gap:12px;padding:16px;background:var(--excl-block-bg);border:1px dashed var(--excl-block-border);border-radius:6px;color:var(--text-muted)}}
+.excl-icon{{font-size:1.4rem;line-height:1;color:var(--excl-icon)}}
+.excl-title{{font-weight:500;color:var(--excl-title);font-size:0.85rem}}
+.excl-sub{{font-size:0.75rem;color:var(--excl-sub);margin-top:3px}}
 
 /* Sensitive banner */
-.sensitive-banner{{background:#fffbeb;border:1px solid #f59e0b;border-radius:6px;padding:8px 14px;font-size:0.78rem;color:#92400e;margin-bottom:12px}}
+.sensitive-banner{{background:var(--sens-bg);border:1px solid var(--sens-border);border-radius:6px;padding:8px 14px;font-size:0.78rem;color:var(--sens-color);margin-bottom:12px}}
 
 /* Scrollbars */
 .sidebar::-webkit-scrollbar,.main::-webkit-scrollbar{{width:5px}}
-.sidebar::-webkit-scrollbar-thumb,.main::-webkit-scrollbar-thumb{{background:#ddd;border-radius:3px}}
+.sidebar::-webkit-scrollbar-thumb,.main::-webkit-scrollbar-thumb{{background:var(--scrollbar);border-radius:3px}}
 </style>
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
 </head>
@@ -371,6 +402,7 @@ body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
     {f'<span>{user_name}</span>' if user_name else ''}
   </div>
   <span class="badge">pButtons Parser</span>
+  <button class="dark-toggle" onclick="toggleDark()" id="dark-toggle">🌙 Dark</button>
 </div>
 
 <div class="layout">
@@ -381,6 +413,23 @@ body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
 </div>
 
 <script>
+// Dark mode
+(function(){{
+  const saved = localStorage.getItem('pbtns_dark');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (saved === 'true' || (saved === null && prefersDark)) applyDark(true);
+}})();
+function applyDark(on){{
+  document.body.classList.toggle('dark', on);
+  const btn = document.getElementById('dark-toggle');
+  if (btn) btn.textContent = on ? '☀️ Light' : '🌙 Dark';
+}}
+function toggleDark(){{
+  const on = !document.body.classList.contains('dark');
+  applyDark(on);
+  localStorage.setItem('pbtns_dark', on);
+}}
+
 // Show only clicked section (scroll into view + highlight nav)
 function showSection(id) {{
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
