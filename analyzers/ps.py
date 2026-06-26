@@ -1,5 +1,5 @@
 """
-Analyzer for the 'ps' section (ps -elfy) in Linux pButtons files.
+Analyzer for the 'ps' section (ps -elfy) in Linux SystemPerformance files.
 
 Each sample is a full snapshot separated by "sample N of M" markers.
 Columns (fixed-width, space-delimited):

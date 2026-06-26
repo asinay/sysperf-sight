@@ -1,5 +1,5 @@
 """
-Analyzer for the 'df -m' section in Linux pButtons files.
+Analyzer for the 'df -m' section in Linux SystemPerformance files.
 
 Format: single snapshot, space-separated, values in MiB.
   Filesystem  1M-blocks  Used  Available  Use%  Mounted on

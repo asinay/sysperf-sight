@@ -1,5 +1,5 @@
 """
-Analyzer for the 'CPF file' section in pButtons files.
+Analyzer for the 'CPF file' section in SystemPerformance files.
 
 Parses the INI-style iris.cpf and produces:
   - Summary cards for the most critical performance/durability settings

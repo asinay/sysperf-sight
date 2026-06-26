@@ -1,5 +1,5 @@
 """
-Analyzer for the 'sar -u' (CPU utilization) section in Linux pButtons files.
+Analyzer for the 'sar -u' (CPU utilization) section in Linux SystemPerformance files.
 
 Expected format:
   Linux ... (preamble line)

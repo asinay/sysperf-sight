@@ -1,5 +1,5 @@
 """
-Analyzer for the 'sysctl -a' section in Linux pButtons files.
+Analyzer for the 'sysctl -a' section in Linux SystemPerformance files.
 
 Produces a compliance table (current vs. recommended) for parameters
 that directly affect IRIS/Caché performance, plus insight flags for

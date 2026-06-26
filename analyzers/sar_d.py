@@ -1,5 +1,5 @@
 """
-Analyzer for the 'sar -d' (disk activity) section in pButtons files.
+Analyzer for the 'sar -d' (disk activity) section in SystemPerformance files.
 Linux only; returns '' silently if the section can't be parsed.
 
 Column variations across sysstat versions:

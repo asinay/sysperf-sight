@@ -6,7 +6,7 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from pbuttons_parser import parse_sections, build_output
+from sysperfsight_parser import parse_sections, build_output
 from analyzers import SECTION_ANALYZERS
 from analyzers.time_filter import TITLE_TIME_FILTERS
 from analyzers.synthesis import synthesize
@@ -22,7 +22,7 @@ async def lifespan(_app):
     yield
 
 
-app = FastAPI(title="pButtons Parser", lifespan=lifespan)
+app = FastAPI(title="SysPerfSight", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # In-memory store: session_id -> (header_html, sections)
@@ -37,7 +37,7 @@ async def root():
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
     if not file.filename.endswith(".html"):
-        raise HTTPException(400, "Only .html pButtons files are supported.")
+        raise HTTPException(400, "Only .html SystemPerformance files are supported.")
 
     content = await file.read()
     html = content.decode("iso-8859-1", errors="replace")
@@ -66,7 +66,7 @@ async def upload_file(file: UploadFile = File(...)):
 class ExportRequest(BaseModel):
     session_id: str
     selected_ids: list[str]
-    output_filename: str = "pbuttons_filtered.html"
+    output_filename: str = "sysperf_report.html"
     time_from: str = ""
     time_to: str = ""
     mode: str = "full"  # "full" | "charts_only" | "charts_raw"

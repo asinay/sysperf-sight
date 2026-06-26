@@ -1,6 +1,6 @@
 """
-Analyzer for the 'iostat' section found in Linux pButtons files.
-Windows pButtons files do not contain this section; returns '' silently.
+Analyzer for the 'iostat' section found in Linux SystemPerformance files.
+Windows SystemPerformance files do not contain this section; returns '' silently.
 
 Expected format: iostat -xmt (repeated intervals with timestamps)
   Linux ... (preamble)

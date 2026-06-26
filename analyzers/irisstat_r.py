@@ -1,5 +1,5 @@
 """
-Analyzer for the 'irisstat -R' (routine buffer pool) section in pButtons files.
+Analyzer for the 'irisstat -R' (routine buffer pool) section in SystemPerformance files.
 
 irisstat -R dumps the current state of the IRIS routine buffer pool. Each row
 is one buffer slot:

@@ -1,12 +1,12 @@
 """
 Standalone vmstat analyzer test.
-Usage:  ./venv/Scripts/python test_vmstat.py <pbuttons_file.html>
+Usage:  ./venv/Scripts/python test_vmstat.py <sysperf_file.html>
 Output: test_vmstat_out.html  (open in browser to see charts)
 """
 import re
 import sys
 import asyncio
-from pbuttons_parser import parse_sections
+from sysperfsight_parser import parse_sections
 from analyzers.vmstat import analyze, _parse_vmstat
 
 PLOTLY_CDN = '<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>'

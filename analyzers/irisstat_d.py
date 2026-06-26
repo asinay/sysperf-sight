@@ -1,5 +1,5 @@
 """
-Analyzer for the 'irisstat -D' (database/resource lock stats) section in pButtons files.
+Analyzer for the 'irisstat -D' (database/resource lock stats) section in SystemPerformance files.
 
 irisstat -D reports resource lock contention across multiple samples. Each sample contains:
   - RESOURCE STATS OVER A N-SECOND INTERVAL

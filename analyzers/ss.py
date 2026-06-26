@@ -1,5 +1,5 @@
 """
-Analyzer for the '%SS' (IRIS System Status) section in pButtons files.
+Analyzer for the '%SS' (IRIS System Status) section in SystemPerformance files.
 
 Format notes (learned from real data):
 - Each snapshot starts with 'InterSystems IRIS System Status: <time>'

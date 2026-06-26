@@ -1,12 +1,12 @@
 """
-Analyzer for the 'free' section in Linux pButtons files.
+Analyzer for the 'free' section in Linux SystemPerformance files.
 
 Expected format: CSV with header row, one sample per line.
   Date,     Time,      Memtotal,     used,     free,   shared,  buffers,   cached,  adjused,  adjfree,swaptotal, swapused, swapfree,
   06/15/26, 00:05:01,    514823,   120945,   149623, ...
 
 All memory values are in MB. Trailing swap columns may be absent on some
-pButtons versions — columns are mapped by header name, not position.
+SystemPerformance versions — columns are mapped by header name, not position.
 """
 import re
 import pandas as pd

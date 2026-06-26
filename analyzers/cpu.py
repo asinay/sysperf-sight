@@ -211,7 +211,7 @@ async def analyze(section_text: str) -> str:
       {rows_html}
     </table>
   </div>
-  <div style="font-size:0.72rem;color:#aaa;margin-top:6px">Copy this table from both pButtons reports to compare systems directly.</div>
+  <div style="font-size:0.72rem;color:#aaa;margin-top:6px">Copy this table from both SystemPerformance reports to compare systems directly.</div>
 </div>'''
 
     return f'''

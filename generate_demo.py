@@ -1,5 +1,5 @@
 """
-Generates a realistic fake pButtons HTML file and runs it through the full
+Generates a realistic fake SystemPerformance HTML file and runs it through the full
 parser + analyzer pipeline to produce a demo output report.
 
 Usage:
@@ -10,7 +10,7 @@ import asyncio
 import random
 import math
 from datetime import datetime, timedelta
-from pbuttons_parser import parse_sections, build_output
+from sysperfsight_parser import parse_sections, build_output
 from analyzers import SECTION_ANALYZERS
 from analyzers.time_filter import TITLE_TIME_FILTERS
 from analyzers.synthesis import synthesize
@@ -419,7 +419,7 @@ Kernel: 5.14.0-427.el9.x86_64
 Hostname: xrdclpdbscol01
 """
 
-# ── Assemble pButtons HTML ────────────────────────────────────────────────────
+# ── Assemble SystemPerformance HTML ────────────────────────────────────────────────────
 
 def make_section_hr(section_id: str, title: str, pre_content: str) -> str:
     return (
@@ -445,7 +445,7 @@ HEADER_HTML = """<html>
 <title>IRIS Performance Data Report. Filename: xrdclpdbscol01_IRIS_20260615_0005_4hours.html</title>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
-<body bgcolor="#FFFFFF" text="#000000"> <!-- Document Version:pButtonsv1.09 Data Version: pButtonsv1.09 -->
+<body bgcolor="#FFFFFF" text="#000000"> <!-- Document Version:SystemPerformancev1.09 Data Version: SystemPerformancev1.09 -->
 <a id="Topofpage"></a>
 <table align="center" width="92%" border="1">
 <tr><td colspan="9" align="center">

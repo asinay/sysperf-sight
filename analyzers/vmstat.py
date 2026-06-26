@@ -1,5 +1,5 @@
 """
-Analyzer for the 'vmstat' section in Linux pButtons files.
+Analyzer for the 'vmstat' section in Linux SystemPerformance files.
 
 Expected format: one header line followed by timestamped data rows.
   MM/DD/YY HH:MM:SS  r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st

@@ -56,7 +56,7 @@ class Section:
 
 def parse_sections(html: str) -> tuple[str, list[Section]]:
     """
-    Parse a pButtons HTML file into its header and individual sections.
+    Parse a SystemPerformance HTML file into its header and individual sections.
     Returns (header_html, [Section, ...]).
     """
     # The header is everything before the first <hr> separator that precedes a section
@@ -156,8 +156,8 @@ def parse_sections(html: str) -> tuple[str, list[Section]]:
 _EXCLUDED_PLACEHOLDER = (
     '<pre>\n'
     '    [ This section was excluded by the report author. ]\n'
-    '    [ Filtered using pButtons Parser - a free tool that redacts InterSystems IRIS\n'
-    '      pButtons files locally, without uploading any data to the cloud. ]\n'
+    '    [ Filtered using SysPerfSight - a free tool that redacts InterSystems IRIS\n'
+    '      SystemPerformance files locally, without uploading any data to the cloud. ]\n'
     '</pre>'
 )
 
@@ -298,7 +298,7 @@ def build_output(
   <div class="excl-icon">⊘</div>
   <div>
     <div class="excl-title">Section excluded by report author</div>
-    <div class="excl-sub">Filtered using pButtons Parser - a free tool that redacts InterSystems IRIS pButtons files locally, without uploading any data to the cloud.</div>
+    <div class="excl-sub">Filtered using SysPerfSight - a free tool that redacts InterSystems IRIS SystemPerformance files locally, without uploading any data to the cloud.</div>
   </div>
 </div>'''
             excl_banner = ''
@@ -332,7 +332,7 @@ def build_output(
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>pButtons - {instance_name} {run_time}</title>
+<title>SysPerfSight - {instance_name} {run_time}</title>
 <style>
 *,*::before,*::after{{box-sizing:border-box;margin:0;padding:0}}
 
@@ -432,14 +432,14 @@ body.dark .raw-toggle{{color:#4d9fff}}
 <body>
 
 <div class="topbar">
-  <h1>pButtons Performance Report</h1>
+  <h1>SysPerfSight</h1>
   <div class="meta">
     {f'<span>{instance_name}</span>' if instance_name else ''}
     {f'<span>{machine_name}</span>' if machine_name else ''}
     {f'<span>{run_time}</span>' if run_time else ''}
     {f'<span>{user_name}</span>' if user_name else ''}
   </div>
-  <span class="badge">pButtons Parser</span>
+  <span class="badge">SysPerfSight</span>
   <button class="dark-toggle" onclick="toggleDark()" id="dark-toggle">🌙 Dark</button>
 </div>
 

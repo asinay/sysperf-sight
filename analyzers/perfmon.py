@@ -1,5 +1,5 @@
 """
-Analyzer for the 'perfmon' section in Windows pButtons files.
+Analyzer for the 'perfmon' section in Windows SystemPerformance files.
 
 Expected format: PDH-CSV export from logman.
   Header: "(PDH-CSV 4.0) (timezone)(offset)","\\\\HOST\\Object(instance)\\counter",...

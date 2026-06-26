@@ -1,7 +1,7 @@
 services:
-  pbuttons-parser:
+  sysperfsight:
     build: .
-    container_name: pbuttons-parser
+    container_name: sysperfsight
     ports:
       - "8765:8765"
     restart: unless-stopped

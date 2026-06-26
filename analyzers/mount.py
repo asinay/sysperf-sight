@@ -1,5 +1,5 @@
 """
-Analyzer for the 'mount' section in Linux pButtons files.
+Analyzer for the 'mount' section in Linux SystemPerformance files.
 
 Format: one mount per line:
   <device> on <mountpoint> type <fstype> (<options,...>)

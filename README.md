@@ -1,11 +1,11 @@
-# pButtons Parser
+# SysPerfSight
 
-A web tool for extracting specific sections from InterSystems IRIS pButtons HTML performance reports. Upload a pButtons file, choose which sections to keep, and download a clean filtered copy — without sharing data you didn't intend to.
+A web tool for analyzing InterSystems IRIS SystemPerformance HTML reports. Upload a report, choose which sections to keep, and download a clean analyzed copy — with inline charts, insights, and cross-section synthesis — without sharing data you didn't intend to.
 
 ## Features
 
 - **100% local processing — your file never leaves your machine.** The tool runs entirely on your own computer. All parsing is done in-process using Python's standard library (`re`). The three dependencies (FastAPI, Uvicorn, python-multipart) are server/parsing primitives that make no outbound network calls. The server binds to `127.0.0.1` (loopback only), so even the traffic between your browser and the tool stays within your machine's network stack. No data is sent to any cloud service or AI.
-- Drag-and-drop upload of pButtons `.html` files
+- Drag-and-drop upload of SystemPerformance `.html` files
 - All sections detected and listed automatically
 - Sensitive sections (license keys, usernames, file paths, machine details) are flagged and **pre-deselected** with explanations
 - One-click "Select non-sensitive only" filter
@@ -22,20 +22,20 @@ A web tool for extracting specific sections from InterSystems IRIS pButtons HTML
 Requires [Docker](https://docs.docker.com/get-docker/).
 
 ```bash
-docker run -p 8765:8765 --name pbuttons-parser ghcr.io/asinay/pbuttons-parser
+docker run -p 8765:8765 --name sysperfsight ghcr.io/asinay/sysperf-sight
 ```
 
 If port 8765 is already in use, pick any free port (e.g. 8080):
 
 ```bash
-docker run -p 8080:8765 --name pbuttons-parser ghcr.io/asinay/pbuttons-parser
+docker run -p 8080:8765 --name sysperfsight ghcr.io/asinay/sysperf-sight
 ```
 
 Or build and run locally:
 
 ```bash
-docker build -t pbuttons-parser .
-docker run -p 8765:8765 --name pbuttons-parser pbuttons-parser
+docker build -t sysperfsight .
+docker run -p 8765:8765 --name sysperfsight sysperfsight
 ```
 
 Using Docker Compose:
@@ -105,7 +105,7 @@ Selected sections with an analyzer get inline charts and insights injected above
 
 ```
 app.py                  FastAPI backend (upload + export endpoints)
-pbuttons_parser.py      HTML parsing and section reconstruction logic
+sysperfsight_parser.py  HTML parsing and section reconstruction logic
 static/index.html       Single-page frontend (no build step)
 analyzers/              Per-section analysis modules
 requirements.txt        Python dependencies

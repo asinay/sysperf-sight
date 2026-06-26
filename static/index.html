@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pButtons Parser</title>
+  <title>SysPerfSight</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -340,8 +340,8 @@
 
 <header>
   <div>
-    <h1>pButtons Parser</h1>
-    <span>InterSystems IRIS Performance Data — Section Extractor</span>
+    <h1>SysPerfSight</h1>
+    <span>InterSystems IRIS SystemPerformance — Report Analyzer</span>
   </div>
   <button class="dark-toggle" id="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">
     <span id="dark-icon">🌙</span> Dark mode
@@ -355,8 +355,8 @@
     <div class="upload-zone" id="drop-zone">
       <input type="file" id="file-input" accept=".html" />
       <div class="icon">📂</div>
-      <p><strong>Drop your pButtons .html file here</strong><br>or click to browse</p>
-      <p class="hint">Only .html files exported from InterSystems IRIS System Performance are supported.</p>
+      <p><strong>Drop your SystemPerformance .html file here</strong><br>or click to browse</p>
+      <p class="hint">Only .html files exported from InterSystems IRIS SystemPerformance are supported.</p>
     </div>
     <div id="status"></div>
   </div>
@@ -395,7 +395,7 @@
     <div style="margin-top:24px;margin-bottom:6px;font-size:0.8rem;color:var(--text-muted)">
       <span id="count-badge">0 sections selected</span>
     </div>
-    <input type="text" id="output-filename" placeholder="output-filename.html" value="pbuttons_filtered.html"
+    <input type="text" id="output-filename" placeholder="sysperf_report.html" value="sysperf_report.html"
       style="width:100%;border:1px solid var(--input-border);border-radius:6px;padding:9px 12px;font-size:0.9rem;outline:none;background:var(--input-bg);color:var(--text);margin-bottom:8px" />
     <div class="export-bar">
       <button class="btn-secondary" id="charts-raw-btn" onclick="exportFile('charts_raw')" disabled>Charts + Raw</button>
@@ -467,7 +467,7 @@
         + String(now.getDate()).padStart(2, '0')
         + '_' + String(now.getHours()).padStart(2, '0')
         + String(now.getMinutes()).padStart(2, '0');
-      document.getElementById('output-filename').value = `pbuttons_${ts}.html`;
+      document.getElementById('output-filename').value = `sysperf_${ts}.html`;
       showStatus('success', `Parsed ${data.sections.length} sections successfully.`);
     } catch (err) {
       showStatus('error', '❌ ' + err.message);
@@ -564,7 +564,7 @@
       .map(el => el.dataset.id);
     if (!selectedIds.length) return;
 
-    const rawFilename = document.getElementById('output-filename').value.trim() || 'pbuttons_filtered.html';
+    const rawFilename = document.getElementById('output-filename').value.trim() || 'sysperf_report.html';
     const base = rawFilename.replace(/\.html$/i, '');
     const outputFilename = mode === 'charts_only' ? base + '_charts.html'
                          : mode === 'charts_raw'  ? base + '_charts_raw.html'
