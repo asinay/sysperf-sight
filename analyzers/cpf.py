@@ -732,10 +732,12 @@ async def analyze(section_text: str) -> str:
         all_flags.append(_flag('green', 'No significant configuration concerns detected.'))
 
     insights_html = (
+        '<!--INS-->'
         '<div style="margin-bottom:18px">'
         '<div style="font-size:0.72rem;font-weight:700;color:#555;text-transform:uppercase;'
         'letter-spacing:.06em;margin-bottom:6px">Insights</div>'
         + ''.join(all_flags) + '</div>'
+        + '<!--/INS-->'
     )
 
     version = sections.get('ConfigFile', {}).get('Version', '')

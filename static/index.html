@@ -266,22 +266,11 @@
     .export-bar {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       margin-top: 24px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
     }
-    .export-bar input[type=text] {
-      flex: 1;
-      min-width: 180px;
-      border: 1px solid var(--input-border);
-      border-radius: 6px;
-      padding: 9px 12px;
-      font-size: 0.9rem;
-      outline: none;
-      background: var(--input-bg);
-      color: var(--text);
-    }
-    .export-bar input[type=text]:focus { border-color: #0055aa; }
+    #output-filename:focus { border-color: #0055aa; }
 
     .btn-primary {
       background: #0055aa;
@@ -297,6 +286,24 @@
     }
     .btn-primary:hover { background: #0044cc; }
     .btn-primary:disabled { background: var(--btn-disabled); cursor: not-allowed; }
+
+    .btn-secondary {
+      background: transparent;
+      color: #0055aa;
+      border: 1.5px solid #0055aa;
+      border-radius: 6px;
+      padding: 9px 14px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      white-space: nowrap;
+    }
+    .btn-secondary:hover { background: #e8f0ff; }
+    .btn-secondary:disabled { border-color: var(--btn-disabled); color: var(--btn-disabled); cursor: not-allowed; background: transparent; }
+    body.dark .btn-secondary { color: #4d9fff; border-color: #4d9fff; }
+    body.dark .btn-secondary:hover { background: #1a2540; }
+    body.dark .btn-secondary:disabled { border-color: var(--btn-disabled); color: var(--btn-disabled); }
 
     .count-badge {
       font-size: 0.8rem;
@@ -385,10 +392,15 @@
       <div class="tf-applies" id="tf-applies"></div>
     </div>
 
+    <div style="margin-top:24px;margin-bottom:6px;font-size:0.8rem;color:var(--text-muted)">
+      <span id="count-badge">0 sections selected</span>
+    </div>
+    <input type="text" id="output-filename" placeholder="output-filename.html" value="pbuttons_filtered.html"
+      style="width:100%;border:1px solid var(--input-border);border-radius:6px;padding:9px 12px;font-size:0.9rem;outline:none;background:var(--input-bg);color:var(--text);margin-bottom:8px" />
     <div class="export-bar">
-      <input type="text" id="output-filename" placeholder="output-filename.html" value="pbuttons_filtered.html" />
-      <span class="count-badge" id="count-badge">0 sections selected</span>
-      <button class="btn-primary" id="export-btn" onclick="exportFile()">Download filtered file</button>
+      <button class="btn-secondary" id="charts-raw-btn" onclick="exportFile('charts_raw')" disabled>Charts + Raw</button>
+      <button class="btn-secondary" id="charts-btn" onclick="exportFile('charts_only')" disabled>Charts only</button>
+      <button class="btn-primary" id="export-btn" onclick="exportFile('full')">Full report</button>
     </div>
   </div>
 
@@ -449,6 +461,13 @@
       sessionId = data.session_id;
       allSections = data.sections;
       renderSections(data.filename, data.sections);
+      const now = new Date();
+      const ts = now.getFullYear().toString()
+        + String(now.getMonth() + 1).padStart(2, '0')
+        + String(now.getDate()).padStart(2, '0')
+        + '_' + String(now.getHours()).padStart(2, '0')
+        + String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('output-filename').value = `pbuttons_${ts}.html`;
       showStatus('success', `Parsed ${data.sections.length} sections successfully.`);
     } catch (err) {
       showStatus('error', '❌ ' + err.message);
@@ -514,7 +533,10 @@
   function updateCount() {
     const selected = document.querySelectorAll('.section-item.selected').length;
     document.getElementById('count-badge').textContent = `${selected} section${selected !== 1 ? 's' : ''} selected`;
-    document.getElementById('export-btn').disabled = selected === 0;
+    const none = selected === 0;
+    document.getElementById('export-btn').disabled = none;
+    document.getElementById('charts-btn').disabled = none;
+    document.getElementById('charts-raw-btn').disabled = none;
   }
 
   function selectAll(val) {
@@ -537,14 +559,23 @@
   }
 
   // ---- Export ----
-  async function exportFile() {
+  async function exportFile(mode = 'full') {
     const selectedIds = [...document.querySelectorAll('.section-item.selected')]
       .map(el => el.dataset.id);
     if (!selectedIds.length) return;
 
-    const outputFilename = document.getElementById('output-filename').value.trim() || 'pbuttons_filtered.html';
-    const btn = document.getElementById('export-btn');
-    btn.disabled = true;
+    const rawFilename = document.getElementById('output-filename').value.trim() || 'pbuttons_filtered.html';
+    const base = rawFilename.replace(/\.html$/i, '');
+    const outputFilename = mode === 'charts_only' ? base + '_charts.html'
+                         : mode === 'charts_raw'  ? base + '_charts_raw.html'
+                         : rawFilename;
+    const exportBtn   = document.getElementById('export-btn');
+    const chartsBtn   = document.getElementById('charts-btn');
+    const chartsRawBtn = document.getElementById('charts-raw-btn');
+    const btn = mode === 'charts_only' ? chartsBtn : mode === 'charts_raw' ? chartsRawBtn : exportBtn;
+    exportBtn.disabled = true;
+    chartsBtn.disabled = true;
+    chartsRawBtn.disabled = true;
     btn.textContent = 'Generating…';
 
     try {
@@ -554,7 +585,6 @@
       timeFromEl.classList.toggle('invalid', !_validTime(timeFromEl.value));
       timeToEl.classList.toggle('invalid',   !_validTime(timeToEl.value));
       if (!_validTime(timeFromEl.value) || !_validTime(timeToEl.value)) {
-        btn.disabled = false; btn.textContent = 'Download filtered file';
         throw new Error('Time must be in HH:MM 24-hour format (e.g. 02:30)');
       }
       const timeFrom = timeFromEl.value.trim();
@@ -569,6 +599,7 @@
           output_filename: outputFilename,
           time_from: timeFrom,
           time_to: timeTo,
+          mode: mode,
         }),
       });
       if (!res.ok) {
@@ -586,8 +617,12 @@
     } catch (err) {
       showStatus('error', '❌ ' + err.message);
     } finally {
-      btn.disabled = false;
-      btn.textContent = 'Download filtered file';
+      exportBtn.disabled = false;
+      chartsBtn.disabled = false;
+      chartsRawBtn.disabled = false;
+      exportBtn.textContent = 'Full report';
+      chartsBtn.textContent = 'Charts only';
+      chartsRawBtn.textContent = 'Charts + Raw';
     }
   }
 

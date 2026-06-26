@@ -157,10 +157,12 @@ async def analyze(section_text: str) -> str:
         flags.append(_flag('green', 'No memory pressure or run queue saturation detected.'))
 
     insights_html = (
+        '<!--INS-->'
         '<div style="margin-bottom:14px">'
         '<div style="font-size:0.72rem;font-weight:700;color:#555;text-transform:uppercase;'
         'letter-spacing:.06em;margin-bottom:6px">Insights</div>'
         + ''.join(flags) + '</div>'
+        + '<!--/INS-->'
     )
 
     # ── Stat cards ────────────────────────────────────────────────────────────

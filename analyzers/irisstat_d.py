@@ -197,12 +197,12 @@ async def analyze(section_text: str) -> str:
             f'No significant lock contention or block collisions detected across '
             f'{n_samples} sample(s).'))
 
-    insights_html = f'''
+    insights_html = '<!--INS-->' + f'''
 <div style="margin-bottom:14px">
   <div style="font-size:0.72rem;font-weight:700;color:#555;text-transform:uppercase;
               letter-spacing:.06em;margin-bottom:6px">Insights</div>
   {''.join(flags)}
-</div>'''
+</div>''' + '<!--/INS-->'
 
     # ── Summary table — key resources, aggregated ─────────────────────────────
     table_rows = ''

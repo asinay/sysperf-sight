@@ -10,7 +10,12 @@ A web tool for extracting specific sections from InterSystems IRIS pButtons HTML
 - Sensitive sections (license keys, usernames, file paths, machine details) are flagged and **pre-deselected** with explanations
 - One-click "Select non-sensitive only" filter
 - Excluded sections keep their header and nav anchor — replaced with a clearly marked placeholder so the file remains well-formed and shareable
-- Download the filtered file with only the sections you chose
+- Optional time range filter to slice time-series sections (mgstat, vmstat, sar, iostat)
+- **Three export modes** for different sharing needs:
+  - **Full report** — charts, insights, raw data, cross-section synthesis, and sensitive-data banners
+  - **Charts + Raw** — charts plus raw data (collapsed); no insights or synthesis
+  - **Charts only** — charts only; no raw data, no insights; excluded sections hidden entirely
+- Output filename auto-populated from the source file name + upload timestamp
 
 ## Running with Docker (recommended)
 
@@ -39,7 +44,7 @@ Using Docker Compose:
 docker compose up
 ```
 
-Open http://localhost:8000 in your browser.
+Open http://localhost:8765 in your browser.
 
 ## Setup (without Docker)
 
@@ -77,17 +82,24 @@ Selected sections with an analyzer get inline charts and insights injected above
 
 | Section | What it produces |
 |---|---|
+| mgstat | Global refs, physical I/O, journal writes, WD phase, routine cache, network charts; stat cards; NSeize/ASeize contention and WD saturation insights |
+| %SS | Process type breakdown, TCP trend, top-CPU/Glob tables, namespace and top-routine breakdowns; insights |
+| vmstat | Run queue, swap I/O, CPU breakdown, block I/O charts; stat cards; insights |
+| sar -u | Stacked CPU area chart (user/sys/iowait/steal + idle); stat cards; saturation/steal/iowait insights |
+| sar -d | %util, tps, throughput, r/w latency, queue depth charts; per-device summary table; insights |
+| iostat | %util, CPU iowait, IOPS, throughput, latency charts; insights |
+| free | RAM usage, adjusted free RAM trend, swap used charts; stat cards; memory pressure insights |
+| irisstat -D | Lock contention summary and per-second rates tables (sortable); block collision insights |
+| irisstat -R | Routine buffer pool: in-use routines, top packages by buffer count, type breakdown; class LRU eviction insights |
+| sysctl -a | Compliance table for IRIS-relevant kernel parameters (sortable); red/amber/green status; tuning insights |
+| ps | Process snapshot: RSS by user chart, top-15 by RSS table, IRIS job-type breakdown; D-state insights |
+| df -m | Disk usage stacked bar chart; full filesystem table with colour-coded Use% badge; capacity insights |
+| mount | Local and network filesystem tables (sortable); soft-mount and NFS sync insights |
+| cpu | CPU topology summary cards |
 | Windows info | OS/hardware summary cards |
 | tasklist | Top processes by memory |
-| mgstat | Global refs, physical I/O, journal writes, cache, network charts; stat cards; insights |
-| iostat | %util, CPU iowait, IOPS, throughput, latency charts; insights |
-| cpu | CPU topology summary |
-| %SS | Process type breakdown, TCP trend, top-CPU/Glob tables, namespace breakdown; insights |
-| sar -d | %util, tps, throughput, r/w latency, queue depth charts; per-device summary; insights |
-| sar -u | Stacked CPU chart (user/sys/iowait/steal); stat cards; insights |
-| vmstat | Run queue, swap I/O, CPU breakdown, block I/O charts; stat cards; insights |
-| irisstat -D | Lock contention summary and per-second rates tables; insights |
 | perfmon | CPU utilization, processor queue, available memory, paging, disk IOPS/throughput/latency, network throughput charts; insights |
+| CPF file | Database configuration, namespace mappings, and key parameter summary |
 
 ## Project structure
 
@@ -95,7 +107,7 @@ Selected sections with an analyzer get inline charts and insights injected above
 app.py                  FastAPI backend (upload + export endpoints)
 pbuttons_parser.py      HTML parsing and section reconstruction logic
 static/index.html       Single-page frontend (no build step)
+analyzers/              Per-section analysis modules
 requirements.txt        Python dependencies
-uploads/                Temp directory (not currently used for storage)
 outputs/                Generated filtered files
 ```

@@ -29,7 +29,7 @@ The app has three layers that must stay in sync:
 
 **[pbuttons_parser.py](pbuttons_parser.py)** — Pure parsing logic, no web framework dependency.
 - `parse_sections(html)` → `(header_html, [Section])`: splits the file into a header block (nav table + debug comment) and a list of `Section` dataclasses. Uses two regex patterns: one for `Configuration`/`Profile` which use `<div id="...">` (quoted), and one for all other sections which use `<div id=...>` (unquoted).
-- `build_output(header_html, sections, selected_ids, analysis)` → `str`: iterates **all** sections — selected ones keep their full content, excluded ones show a placeholder. Injects `analysis[section_id]` HTML above each section's raw data block when present.
+- `build_output(header_html, sections, selected_ids, analysis, synthesis, mode)` → `str`: iterates **all** sections — selected ones keep their full content, excluded ones show a placeholder. Injects `analysis[section_id]` HTML above each section's raw data block when present. `mode` controls output depth: `'full'` (default) includes charts + insights + raw data + synthesis + sensitive banners; `'charts_raw'` strips insights and synthesis, keeps raw data collapsed; `'charts_only'` strips everything except charts, hides excluded panels entirely.
 - `_make_excluded_html(content_html)`: strips all `<pre>…</pre>` blocks then inserts `_EXCLUDED_PLACEHOLDER` at the position of the first `<pre>`. The strip-then-insert order is important — do not replace-then-strip or the placeholder itself gets removed.
 - `SENSITIVE_SECTIONS` dict maps section **titles** to human-readable reasons — drives UI warnings and default deselection.
 - `SECTION_DESCRIPTIONS` dict maps section **titles** to one-line descriptions shown in the output sidebar.
@@ -38,11 +38,18 @@ The app has three layers that must stay in sync:
 
 **[app.py](app.py)** — FastAPI backend with two endpoints:
 - `POST /upload` — accepts a multipart `.html` file, calls `parse_sections`, stores result in the in-memory `sessions` dict keyed by UUID, returns section metadata (id, title, sensitive flag, reason, time_filterable).
-- `POST /export` — accepts `{session_id, selected_ids, output_filename, time_from, time_to}`, applies time filters, runs analyzers in parallel, calls `build_output`, returns the result as a file download.
+- `POST /export` — accepts `{session_id, selected_ids, output_filename, time_from, time_to, mode}`, applies time filters, runs analyzers in parallel (skipping synthesis when `mode` is not `'full'`), strips `<!--INS-->…<!--/INS-->` insight blocks when `mode` is `'charts_only'` or `'charts_raw'`, calls `build_output`, returns the result as a file download.
 
 Sessions are in-memory only — lost on server restart. The `uploads/` directory exists but files are not written there; only `outputs/` gets written.
 
-**[static/index.html](static/index.html)** — Single-file vanilla JS frontend (no build step). Communicates with the backend via `fetch`. Key flow: drag-drop/select file → `POST /upload` → render section checklist → user toggles sections + optionally sets time range → `POST /export` → trigger browser download via blob URL. The file is never opened automatically after download.
+**[static/index.html](static/index.html)** — Single-file vanilla JS frontend (no build step). Communicates with the backend via `fetch`. Key flow: drag-drop/select file → `POST /upload` → render section checklist → user toggles sections + optionally sets time range → one of three export buttons → `POST /export` → trigger browser download via blob URL. The file is never opened automatically after download.
+
+Three export buttons call `exportFile(mode)`:
+- **Full report** (`'full'`) — complete output: charts, insights, raw data, synthesis, sensitive banners.
+- **Charts + Raw** (`'charts_raw'`) — charts + raw data (collapsed); no insights, no synthesis. Filename gets `_charts_raw` suffix.
+- **Charts only** (`'charts_only'`) — charts only; no raw data, no insights, no synthesis, excluded sections hidden. Filename gets `_charts` suffix.
+
+On upload, the output filename field is auto-filled as `{source_stem}_{YYYYMMDD_HHMM}.html` using the uploaded file's name and the current local time. The user can edit it freely; mode suffixes are appended to whatever name is in the field.
 
 ## pButtons HTML format
 
@@ -121,6 +128,12 @@ Each analyzer module (`analyzers/*.py`) exposes an `async analyze(section_text: 
 1. Parses the plain text extracted from the section's `<pre>` block(s).
 2. Returns an HTML fragment (charts + insight flags) to inject above the raw data, or `''` if the section can't be parsed.
 
+**Insight markers**: every analyzer wraps its `insights_html` assignment in `<!--INS-->…<!--/INS-->` comment markers so that `app.py` can strip the insights block with a single regex when `mode` is `'charts_only'` or `'charts_raw'`. Stat cards and chart HTML are placed **outside** these markers and are always retained. Pattern at assignment site:
+```python
+insights_html = '<!--INS-->' + f'<div ...>...</div>' + '<!--/INS-->'
+```
+Never wrap the entire analyzer return value — only `insights_html`. Stat cards (`_stat(...)`) and chart HTML go outside the markers.
+
 Current analyzers:
 
 | Section ID | Module | What it produces |
@@ -137,6 +150,10 @@ Current analyzers:
 | irisstat-D | irisstat_d.py | Lock contention summary table (sortable) + per-second rates table (sortable); insights flagging Bseize>0 on Global/LockHTAB/LockLHB/TransCB; block collision flags. Handles Linux (4-col) and Windows (6-col) column variants |
 | free | free.py | RAM usage chart (used/buffers/cached), adjusted free RAM trend, swap used trend; stat cards; insights on low adjfree % and swap usage. Parses CSV header dynamically — columns mapped by name, tolerates missing trailing swap columns |
 | sysctl-a | sysctl.py | Compliance table (current vs. recommended) for IRIS-relevant kernel parameters; red/amber/green status per row; insights for critical misconfigs (swappiness, NUMA balancing, shmmax, semaphores, huge pages, file-max, TCP backlog) |
+| ps | ps.py | Stat cards (total/user-space/IRIS process count, IRIS RSS, D-state count, snapshot count); RSS by user horizontal bar chart; top-15 processes by RSS table; IRIS job-type breakdown table; insights for D-state processes and IRIS process count changes across snapshots |
+| df-m | df_m.py | Stacked used/available bar chart per mount point; full table sorted by Use% with colour-coded badge (green/amber/red); stat cards; insights flagging ≥90% (red) and 75–89% (amber) filesystems, noting IRIS paths explicitly; virtual filesystems excluded |
+| irisstat-R | irisstat_r.py | Routine buffer pool snapshot: stat cards (buffers loaded, pool memory MB, in-use count, old/M/D counts, class descriptor inuse+LRU); pool config cards (buffer counts per size tier); currently in-use routines table; top-20 packages by buffer count with memory and in-use; buffer type breakdown (P/M/D); insights for class LRU evictions, pool near capacity, high old% |
+| mount | mount.py | Stat cards (total/local/network/virtual/ro counts); filesystem type summary table; local FS table (mount point, device, type, notable options); network mounts table (mount point, source, type, version, soft/hard mode, rw/ro, block sizes, server IP); insights for soft network mounts on IRIS paths (amber), read-only IRIS paths, NFS sync option |
 
 ### Shared UI patterns
 

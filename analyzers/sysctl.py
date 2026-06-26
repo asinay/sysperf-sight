@@ -239,10 +239,12 @@ async def analyze(section_text: str) -> str:
         insights.append(_insight('green', 'No critical kernel parameter misconfigurations detected for IRIS workloads.'))
 
     insights_html = (
+        '<!--INS-->'
         '<div style="margin-bottom:16px">'
         '<div style="font-size:0.72rem;font-weight:700;color:#555;text-transform:uppercase;'
         'letter-spacing:.06em;margin-bottom:8px">Insights</div>'
         + ''.join(insights) + '</div>'
+        + '<!--/INS-->'
     )
 
     header_row = (

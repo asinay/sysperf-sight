@@ -176,7 +176,7 @@ async def analyze(section_text: str) -> str:
     if not flags:
         flags.append(_flag('info', 'No significant anomalies detected in this sample window.'))
 
-    insights_html = _insights_panel(flags)
+    insights_html = '<!--INS-->' + _insights_panel(flags) + '<!--/INS-->'
 
     # ── Charts ────────────────────────────────────────────────────────────────
     COLORS = ['#0055aa', '#e74c3c', '#27ae60', '#e67e22', '#8e44ad',

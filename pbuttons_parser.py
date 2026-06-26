@@ -195,6 +195,8 @@ def build_output(
     sections: list[Section],
     selected_ids: list[str],
     analysis: dict[str, str] | None = None,
+    synthesis: str = '',
+    mode: str = 'full',
 ) -> str:
     """Build a redesigned HTML output with a fixed sidebar, grouped navigation,
     and collapsible sections. Selected sections show their data; excluded ones
@@ -232,6 +234,16 @@ def build_output(
             section_to_group[s.id] = 'Other'
 
     nav_html = ''
+    if synthesis:
+        nav_html += '''
+<div class="nav-group">
+  <div class="nav-group-label" style="cursor:default">Overview</div>
+  <div class="nav-group-items">
+    <a href="#synth-panel" class="nav-item" onclick="document.getElementById('synth-panel').scrollIntoView({behavior:'smooth',block:'start'});return false;">
+      &#9781; Performance Summary
+    </a>
+  </div>
+</div>'''
     for group_name, group_sections in grouped.items():
         if not group_sections:
             continue
@@ -239,12 +251,17 @@ def build_output(
         for s in group_sections:
             is_selected = s.id in selected_set
             has_analysis = s.id in analysis
-            dot = '<span class="analysis-dot" title="Analysis available"></span>' if has_analysis else ''
-            excluded_label = '<span class="excl-badge">excluded</span>' if not is_selected else ''
+            is_reduced = mode in ('charts_only', 'charts_raw')
+            if is_reduced and not has_analysis:
+                continue
+            dot = '<span class="analysis-dot" title="Analysis available"></span>' if has_analysis and not is_reduced else ''
+            excluded_label = '<span class="excl-badge">excluded</span>' if not is_selected and not is_reduced else ''
             items += f'''
-<a href="#sec-{s.id}" class="nav-item {'excluded' if not is_selected else ''}" onclick="showSection('{s.id}')">
+<a href="#sec-{s.id}" class="nav-item {'excluded' if not is_selected and not is_reduced else ''}" onclick="showSection('{s.id}')">
   {dot}{s.title}{excluded_label}
 </a>'''
+        if not items:
+            continue
         nav_html += f'''
 <div class="nav-group">
   <div class="nav-group-label" onclick="toggleGroup(this)">{group_name}<span class="chevron">▾</span></div>
@@ -260,17 +277,24 @@ def build_output(
 
         if is_selected:
             analysis_block = f'<div class="analysis-block">{analysis[s.id]}</div>' if s.id in analysis else ''
-            raw_block = f'''
+            if mode == 'charts_only':
+                content_block = analysis_block
+            else:
+                raw_collapsed = mode == 'charts_raw' and bool(analysis_block)
+                raw_block = f'''
 <div class="raw-toggle" onclick="toggleRaw(this)">
-  <span>Raw data</span><span class="chevron">{'▸' if analysis_block else '▾'}</span>
+  <span>Raw data</span><span class="chevron">{'▸' if raw_collapsed else '▾'}</span>
 </div>
-<div class="raw-content" {'style="display:none"' if analysis_block else ''}>
+<div class="raw-content" {'style="display:none"' if raw_collapsed else ''}>
 <pre>{pre_text}</pre>
 </div>'''
-            content_block = analysis_block + raw_block
+                content_block = analysis_block + raw_block
             excl_banner = ''
         else:
-            content_block = f'''<div class="excluded-block">
+            if mode in ('charts_only', 'charts_raw'):
+                content_block = ''
+            else:
+                content_block = f'''<div class="excluded-block">
   <div class="excl-icon">⊘</div>
   <div>
     <div class="excl-title">Section excluded by report author</div>
@@ -280,8 +304,12 @@ def build_output(
             excl_banner = ''
 
         sensitive_banner = ''
-        if s.sensitive and is_selected:
+        if s.sensitive and is_selected and mode == 'full':
             sensitive_banner = f'<div class="sensitive-banner">&#9888; This section may contain sensitive data: {s.sensitive_reason}</div>'
+
+        # In reduced modes skip panels with no content (excluded or no analyzer)
+        if mode in ('charts_only', 'charts_raw') and not content_block:
+            continue
 
         panel_hidden = 'style="display:none"' if collapsed and is_selected else ''
         desc = SECTION_DESCRIPTIONS.get(s.title, '')
@@ -418,6 +446,7 @@ body.dark .raw-toggle{{color:#4d9fff}}
 <div class="layout">
   <nav class="sidebar">{nav_html}</nav>
   <div class="main" id="main-content">
+    {synthesis}
     {panels_html}
   </div>
 </div>

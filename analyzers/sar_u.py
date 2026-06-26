@@ -168,12 +168,12 @@ async def analyze(section_text: str) -> str:
     if not flags:
         flags.append(_flag('green', 'CPU utilisation is within normal range.'))
 
-    insights_html = f'''
+    insights_html = '<!--INS-->' + f'''
 <div style="margin-bottom:14px">
   <div style="font-size:0.72rem;font-weight:700;color:#555;text-transform:uppercase;
               letter-spacing:.06em;margin-bottom:6px">Insights</div>
   {''.join(flags)}
-</div>'''
+</div>''' + '<!--/INS-->'
 
     # ── Stat cards ────────────────────────────────────────────────────────────
     src = avg if avg else {c: df[c].mean() for c in cols if c in df.columns}

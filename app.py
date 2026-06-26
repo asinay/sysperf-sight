@@ -9,6 +9,7 @@ from pydantic import BaseModel
 from pbuttons_parser import parse_sections, build_output
 from analyzers import SECTION_ANALYZERS
 from analyzers.time_filter import TITLE_TIME_FILTERS
+from analyzers.synthesis import synthesize
 
 UPLOAD_DIR = Path("uploads")
 OUTPUT_DIR = Path("outputs")
@@ -68,6 +69,7 @@ class ExportRequest(BaseModel):
     output_filename: str = "pbuttons_filtered.html"
     time_from: str = ""
     time_to: str = ""
+    mode: str = "full"  # "full" | "charts_only" | "charts_raw"
 
 
 @app.post("/export")
@@ -115,7 +117,25 @@ async def export_file(req: ExportRequest):
     results = await asyncio.gather(*[run_analyzer(s, fn) for s, fn in analyzable])
     analysis = {sid: html for sid, html in results if html}
 
-    output_html = build_output(header_html, sections, req.selected_ids, analysis=analysis)
+    if req.mode in ('charts_only', 'charts_raw'):
+        analysis = {sid: _re.sub(r'<!--INS-->.*?<!--/INS-->', '', html, flags=_re.DOTALL)
+                    for sid, html in analysis.items()}
+        synthesis_html = ''
+    else:
+        # Cross-section synthesis — runs after all individual analyzers
+        section_texts = {
+            s.id: '\n'.join(_re.findall(r'<pre>(.*?)</pre>', s.content_html, _re.DOTALL | _re.IGNORECASE))
+            for s in selected_sections
+        }
+        try:
+            synthesis_html = await synthesize(section_texts)
+        except Exception:
+            import traceback
+            print(f'[synthesis] EXCEPTION:\n{traceback.format_exc()}', flush=True)
+            synthesis_html = ''
+
+    output_html = build_output(header_html, sections, req.selected_ids, analysis=analysis,
+                               synthesis=synthesis_html, mode=req.mode)
 
     safe_name = Path(req.output_filename).name
     if not safe_name.endswith(".html"):

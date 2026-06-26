@@ -170,11 +170,11 @@ async def analyze(section_text: str) -> str:
 
     insights_html = ''
     if insights:
-        insights_html = f'''
+        insights_html = '<!--INS-->' + f'''
 <div style="margin-top:16px">
   <div style="font-size:0.8rem;font-weight:600;color:#555;margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">Insights — comparing two systems</div>
   {''.join(insights)}
-</div>'''
+</div>''' + '<!--/INS-->'
 
     # ---- Comparison table hint ----
     compare_rows = [

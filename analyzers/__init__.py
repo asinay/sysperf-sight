@@ -17,6 +17,10 @@ from .perfmon import analyze as analyze_perfmon
 from .cpf import analyze as analyze_cpf
 from .free import analyze as analyze_free
 from .sysctl import analyze as analyze_sysctl
+from .ps import analyze as analyze_ps
+from .df_m import analyze as analyze_df_m
+from .irisstat_r import analyze as analyze_irisstat_r
+from .mount import analyze as analyze_mount
 
 SECTION_ANALYZERS = {
     "Windowsinfo": analyze_windows_info,
@@ -33,4 +37,8 @@ SECTION_ANALYZERS = {
     "CPFfile": analyze_cpf,
     "free": analyze_free,
     "sysctl-a": analyze_sysctl,
+    "ps": analyze_ps,
+    "df-m": analyze_df_m,
+    "irisstat-R": analyze_irisstat_r,
+    "mount": analyze_mount,
 }

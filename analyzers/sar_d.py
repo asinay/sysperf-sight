@@ -226,12 +226,12 @@ async def analyze(section_text: str) -> str:
     if not flags:
         flags.append(_flag('green', 'No significant disk I/O anomalies detected.'))
 
-    insights_html = f'''
+    insights_html = '<!--INS-->' + f'''
 <div style="margin-bottom:14px">
   <div style="font-size:0.72rem;font-weight:700;color:#555;text-transform:uppercase;
               letter-spacing:.06em;margin-bottom:6px">Insights</div>
   {''.join(flags)}
-</div>'''
+</div>''' + '<!--/INS-->'
 
     # ── Summary table (from Average: lines, fall back to computed averages) ──
     if avg_df is not None and not avg_df.empty:

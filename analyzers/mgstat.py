@@ -329,7 +329,7 @@ async def analyze(section_text: str) -> str:
 
     stats_html = ''.join(stat_items)
 
-    insights_html = _mgstat_insights(df)
+    insights_html = '<!--INS-->' + _mgstat_insights(df) + '<!--/INS-->'
 
     return f'''
 <div style="margin:16px 0 24px 0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">

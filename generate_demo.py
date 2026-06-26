@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 from pbuttons_parser import parse_sections, build_output
 from analyzers import SECTION_ANALYZERS
 from analyzers.time_filter import TITLE_TIME_FILTERS
+from analyzers.synthesis import synthesize
 import re
 
 random.seed(42)
@@ -270,6 +271,117 @@ net.core.rmem_max = 134217728
 net.core.wmem_max = 134217728
 """
 
+# ── Section: ps ──────────────────────────────────────────────────────────────
+
+def make_ps():
+    header = "S UID          PID    PPID  C PRI  NI   RSS    SZ WCHAN  STIME TTY          TIME CMD"
+    procs = [
+        # kernel threads
+        "S root           1       0  0  80   0 12448 43595 -      06:15 ?        01:57:40 /usr/lib/systemd/systemd --switched-root --system --deserialize 17",
+        "S root           2       0  0  80   0     0     0 -      06:15 ?        00:00:01 [kthreadd]",
+        "I root           3       2  0  60 -20     0     0 -      06:15 ?        00:00:00 [rcu_gp]",
+        "S root          14       2  0  80   0     0     0 -      06:15 ?        00:24:59 [rcu_sched]",
+        "S root         777       1  0  80   0 85096 59445 -      06:15 ?        00:00:27 /usr/lib/systemd/systemd-journald",
+        "S root        1188       1  0  80   0 14564 45221 -      06:15 ?        00:02:11 /usr/sbin/sshd -D",
+        # IRIS processes
+        "R irisusr      9606       1  0  80   0 12600 6180794 -   06:15 pts/0  00:00:00 /iris/sys/bin/irisdb -w /home/irisusr -s /iris/sys/mgr -U %SYS",
+        "S irisusr      9610    9606  0  80   0 188412 6184000 hrtime 06:15 ?   00:14:33 /iris/sys/bin/irisdb -s/iris/sys/mgr -cj -p26 StartEnsembleJob^EnsLib.HL7.Service",
+        "S irisusr      9611    9606  1  80   0 220048 6185000 hrtime 06:15 ?   00:31:07 /iris/sys/bin/irisdb -s/iris/sys/mgr -cj -p26 StartEnsembleJob^EnsLib.HL7.Service",
+        "S irisusr      9612    9606  0  80   0 144320 6182000 hrtime 06:15 ?   00:08:55 /iris/sys/bin/irisdb -s/iris/sys/mgr -cj -p47 StartEnsembleJob^EnsLib.HTTP.OutboundAdapter",
+        "S irisusr      9613    9606  0  80   0 165888 6183000 hrtime 06:15 ?   00:05:42 /iris/sys/bin/irisdb -s/iris/sys/mgr -cj -p173 domulti^SystemPerformance",
+        "S irisusr      9614    9606  0  80   0 131072 6181000 hrtime 06:15 ?   00:02:18 /iris/sys/bin/irisdb -s/iris/sys/mgr -cj -p29 StartEnsembleJob^EnsLib.MQTTService",
+        # other system processes
+        "S root        1580       1  0  80   0 45000 62000 -      06:15 ?        00:03:12 /usr/bin/python3 /usr/bin/supervisord",
+        "S postgres    2100       1  0  80   0 98304 78000 -      06:15 ?        00:08:44 postgres: autovacuum worker",
+        "S www-data    3210       1  0  80   0 32768 40000 -      06:15 ?        00:01:02 nginx: worker process",
+        "D root        4401       1  0  80   0  8192 12000 -      06:15 ?        00:00:01 /usr/sbin/lvmetad",
+    ]
+    snapshot = header + "\n" + "\n".join(procs)
+    parts = []
+    for i in range(1, 3):
+        parts.append(f"sample {i} of 2\n{snapshot}")
+    return "\n".join(parts)
+
+
+# ── Section: df -m ────────────────────────────────────────────────────────────
+
+DF_M_PRE = """Filesystem                               1M-blocks     Used Available Use% Mounted on
+devtmpfs                                     22982        0     22982   0% /dev
+tmpfs                                        23001       60     22942   1% /dev/shm
+tmpfs                                        23001        1     23000   1% /run
+/dev/mapper/rhel-root                        47470    16637     30834  36% /
+/dev/sda2                                     1014      455       560  45% /boot
+/dev/sda1                                      599        6       593   1% /boot/efi
+/dev/mapper/vg_iris-lv_iris_sys             102347    11524     90823  12% /iris/sys
+/dev/mapper/vg_iris-lv_iris_db             2436567  2122707    313860  88% /iris/db
+/dev/mapper/vg_iris-lv_iris_jrn             204697    23069    181628  12% /iris/jrn
+//fileserver/shared                          512180    48157    464023  10% /mnt/fileshare
+nfsserver:/exports/backups                   409400   385000     24400  94% /mnt/backups
+tmpfs                                          4601        0      4601   0% /run/user/2000
+"""
+
+
+# ── Section: mount ────────────────────────────────────────────────────────────
+
+MOUNT_PRE = """sysfs on /sys type sysfs (rw,nosuid,nodev,noexec,relatime)
+proc on /proc type proc (rw,nosuid,nodev,noexec,relatime)
+devtmpfs on /dev type devtmpfs (rw,nosuid,size=23532844k,mode=755)
+tmpfs on /dev/shm type tmpfs (rw,nosuid,nodev)
+tmpfs on /run type tmpfs (rw,nosuid,nodev,mode=755)
+/dev/mapper/rhel-root on / type xfs (rw,relatime,attr2,inode64,logbufs=8,logbsize=32k,noquota)
+/dev/sda2 on /boot type xfs (rw,relatime,attr2,inode64,logbufs=8,logbsize=32k,noquota)
+/dev/sda1 on /boot/efi type vfat (rw,relatime,fmask=0077,dmask=0077,codepage=437,iocharset=ascii,shortname=winnt,errors=remount-ro)
+/dev/mapper/vg_iris-lv_iris_sys on /iris/sys type xfs (rw,relatime,attr2,inode64,logbufs=8,logbsize=32k,noquota)
+/dev/mapper/vg_iris-lv_iris_db on /iris/db type xfs (rw,relatime,attr2,inode64,logbufs=8,logbsize=32k,noquota)
+/dev/mapper/vg_iris-lv_iris_jrn on /iris/jrn type xfs (rw,relatime,attr2,inode64,logbufs=8,logbsize=32k,noquota)
+//fileserver/shared on /mnt/fileshare type cifs (rw,relatime,vers=3.1.1,cache=strict,username=svc_iris,uid=1000,noforceuid,gid=1000,noforcegid,addr=10.0.0.50,file_mode=0755,dir_mode=0755,soft,nounix,serverino,mapposix,rsize=1048576,wsize=1048576,bsize=1048576,echo_interval=60,actimeo=1)
+nfsserver:/exports/backups on /mnt/backups type nfs4 (rw,relatime,sync,vers=4.2,rsize=1048576,wsize=1048576,namlen=255,soft,proto=tcp,timeo=50,retrans=2,sec=sys,clientaddr=10.0.0.10,lookupcache=none,local_lock=none,addr=10.0.0.20)
+tmpfs on /run/user/1000 type tmpfs (rw,nosuid,nodev,relatime,size=4710460k,mode=700,uid=1000,gid=1000)
+"""
+
+
+# ── Section: irisstat -R ─────────────────────────────────────────────────────
+
+IRISSTAT_R_PRE = """/iris/sys/bin/irisstat -s. -a0 -R1
+
+InterSystems IRIS Running version:
+ IRIS for UNIX (Red Hat Enterprise Linux 8 for x86-64) 2025.1.3 (Build 481_1)
+The time is: Sun Jun 15 06:15:00 2026
+
+Dumping gmaxsharedclsvec 512, gmaxclsvec 128 (cached cls/proc) classes inuse 487 classes LRU 0
+Initial gmaxsharedclsvec 512, gmaxclsvec 128
+    num vec 4, clsid/vec 256
+	shared cls memused 2097152
+
+numrblru=3 rou wait time 120 sec
+Number of rtn buf: 4 KB-> 16384, 16 KB-> 12288, 64 KB-> 4096,
+gmaxrouvec (cache rtns/proc): 4 KB-> 280, 16 KB-> 280, 64 KB-> 280,
+
+Dumping Routine Buffer Pool Currently Inuse
+ hash   buf  size sys sfn inuse old type   rcrc     rtime   rver rctentry rouname
+    2:10001  4096   0  16     2   0  M  2b0e567c  686c1fd1     4 627e2ba7  EnsLib.HL7.Service.1
+    3:10002 16384   0  16     1   0  D  e2588d78  686c1fd1     3 63bc4190  EnsLib.HL7.Service.0
+    4:10003  4096   0  23     0   0  P  81ce03cf  68d1e385    51 777f1473  HS.FHIR.DTL.vR4.SDA3.Observation.0
+    5:10004 65536   0  23     0   0  P  6aebde11  68d1e385    52 76bd7e44  HS.FHIR.DTL.vR4.SDA3.Observation.1
+    6:10005  4096   0   1     0   1  P  d9787dbe  68d1dc40    33 86f2db99  %CSP.UI.Portal.Home.0
+    7:10006  4096   0   1     0   0  P  45765e7d  68d1dc40    34 8730b1ae  %CSP.UI.Portal.Home.1
+    8:10007  4096   0  16     0   0  P  8e207070  689a282d     2 dd17f3f5  EnsLib.HTTP.OutboundAdapter.0
+    9:10008 16384   0  16     0   0  M  87a9379e  689a282d     1 dcd599c2  EnsLib.HTTP.OutboundAdapter.1
+   10:10009 65536   0  23     0   0  P  b9d81e2f  68d1e384     1 a8dcc831  HS.FHIR.DTL.SDA3.vR4.Patient.1
+   11:10010  4096   0  23     0   0  P  ac132faf  68d1e384     2 a91ea206  HS.FHIR.DTL.SDA3.vR4.Patient.0
+   12:10011  4096   0   0     3   0  M  da668644  68d1de51    19 1ae78327  %SYSTEM.WorkMgr.0
+   13:10012  4096   0   0     1   0  D  ede05266  68d1de51    20 1b25e910  %SYSTEM.WorkMgr.1
+   14:10013  4096   0   1     0   0  P  58bffad7  68d1dbff    50 dcc5d477  %Library.File.0
+   15:10014 16384   0   1     0   0  P  a922762f  68d1dbff    49 dd07be40  %Library.File.1
+   16:10015  4096   0  23     0   0  P  3fbc20b5  68d1e385    47 3928f4cb  HS.FHIR.DTL.vR4.SDA3.Medication.0
+   17:10016  4096   0  23     0   0  P  d9183894  68d1e385    49 38ea9efc  HS.FHIR.DTL.vR4.SDA3.Medication.1
+   18:10017  4096   0  24     0   0  P  64e57519  68d1ddac     9 1ace28d0  EnsLib.RecordMap.Service.0
+   19:10018 16384   0  24     0   0  M  077c1ad2  68d1ddac     8 1b0c42e7  EnsLib.RecordMap.Service.1
+   20:10019 65536   0   1     0   0  P  1d5f0ad2  68d1dc02    40 21d77f05  %CSP.UI.Portal.Utils.0
+   21:10020  4096   0   1     0   0  P  9e8aa7fc  68d1dc02    41 20151532  %CSP.UI.Portal.Utils.1
+"""
+
+
 # ── Section: cpu (lscpu) ──────────────────────────────────────────────────────
 
 CPU_PRE = """Architecture:            x86_64
@@ -360,15 +472,19 @@ RAW_HTML += make_section_p("Profile", "Profile", PROFILE_PRE)
 
 # All other sections use <hr><b> (unquoted id)
 sections_data = [
-    ("mgstat",    "mgstat",    make_mgstat()),
-    ("vmstat",    "vmstat",    make_vmstat()),
-    ("sar-u",     "sar -u",    make_sar_u()),
-    ("sar-d",     "sar -d",    make_sar_d()),
-    ("iostat",    "iostat",    make_iostat()),
-    ("free",      "free",      make_free()),
-    ("sysctl-a",  "sysctl -a", SYSCTL_PRE),
-    ("Linuxinfo", "Linux info", LINUXINFO_PRE),
-    ("cpu",       "cpu",        CPU_PRE),
+    ("mgstat",       "mgstat",       make_mgstat()),
+    ("vmstat",       "vmstat",       make_vmstat()),
+    ("sar-u",        "sar -u",       make_sar_u()),
+    ("sar-d",        "sar -d",       make_sar_d()),
+    ("iostat",       "iostat",       make_iostat()),
+    ("free",         "free",         make_free()),
+    ("sysctl-a",     "sysctl -a",    SYSCTL_PRE),
+    ("ps",           "ps",           make_ps()),
+    ("df-m",         "df -m",        DF_M_PRE),
+    ("mount",        "mount",        MOUNT_PRE),
+    ("irisstat-R",   "irisstat -R",  IRISSTAT_R_PRE),
+    ("Linuxinfo",    "Linux info",   LINUXINFO_PRE),
+    ("cpu",          "cpu",          CPU_PRE),
 ]
 
 for sec_id, title, content in sections_data:
@@ -401,8 +517,16 @@ async def main():
     analysis = {sid: html for sid, html in results if html}
     print(f"  Analysis produced for: {list(analysis.keys())}")
 
+    print("Running synthesis...")
+    section_texts = {
+        s.id: '\n'.join(re.findall(r'<pre>(.*?)</pre>', s.content_html, re.DOTALL))
+        for s in sections if s.id in selected_ids
+    }
+    synthesis_html = await synthesize(section_texts)
+    print(f"  Synthesis: {'produced' if synthesis_html else 'empty'}")
+
     print("Building output...")
-    output_html = build_output(header_html, sections, selected_ids, analysis=analysis)
+    output_html = build_output(header_html, sections, selected_ids, analysis=analysis, synthesis=synthesis_html)
 
     out_path = "demo_output.html"
     with open(out_path, "w", encoding="utf-8") as f:
